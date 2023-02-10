@@ -23,4 +23,5 @@ When a visitor interacts with this mode, the chat widget is populated with the p
 - [x] Ephemeral keys
 - [x] Encrypted DMs mode
 - [x] Tag-scoped chats mode
-- [ ] In-thread replies
+- [x] In-thread replies
+- [ ] Root-replies mode: similar to global (publicly available) but visitor doesn't see any past history and only sees in-thread replies to the OP
