@@ -5,7 +5,7 @@
 	let chatStarted;
 	let chatType = 'GLOBAL';
 	let websiteOwnerPubkey = 'fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52';
-	let chatTags = ['nostrica'];
+	let chatTags = ['bitcoin'];
 	let chatReferenceTags = [];
 	const relays = [
 		'wss://relay.f7z.io',
@@ -24,7 +24,7 @@
 </script>
 
 <svelte:head>
-	<title>Nostri.chat -- A NOSTR chat widget you control</title>
+	<title>Nostri.chat / A NOSTR chat widget you control</title>
 	<meta property="og:url" content="https://nostri.chat/">
 	<meta name="description" content="A chat widget you own, powered by nostr" />
     <meta property="og:description" content="A chat widget you own, powered by nostr" />
@@ -264,13 +264,13 @@
 			">
 &lt;script
 	src="https://nostri.chat/public/bundle.js"
-	<span class="text-green-600">&lt;!-- YOUR PUBKEY IN HEX FORMAT --&gt;</span>
+	<span class="text-green-600">// YOUR PUBKEY IN HEX FORMAT</span>
 	<b>data-website-owner-pubkey</b>="<span class="text-orange-500">YOUR_PUBKEY"</span>
-	<span class="text-green-600">&lt;!-- THE TYPE OF CHAT YOU WANT: GLOBAL or DMs --&gt;</span>
+	<span class="text-green-600">// THE TYPE OF CHAT YOU WANT: GLOBAL or DMs</span>
 	<b>data-chat-type</b>="<span class="text-orange-500">GLOBAL" </span>
-	<span class="text-green-600">&lt;!-- If you use GLOBAL you can choose set a comma-separated list of hashtags--&gt;</span>
-	<b>data-chat-tags</b>="<span class="text-orange-500">#nostrica,#bitcoin"</span>
-	<span class="text-green-600">&lt;!-- Relays you'd like to use --&gt;</span>
+	<span class="text-green-600">// If you use GLOBAL you can choose set a comma-separated list of hashtags</span>
+	<b>data-chat-tags</b>="<span class="text-orange-500">nostrica,bitcoin"</span>
+	<span class="text-green-600">// Relays you'd like to use, change this this as you wish</span>
 	<b>data-relays</b>="<span class="text-orange-500">wss://relay.f7z.io,wss://nos.lol,wss://relay.nostr.info,wss://nostr-pub.wellorder.net,wss://relay.current.fyi,wss://relay.nostr.band"</span>
 &gt;&lt;/script&gt;
 &lt;link rel="stylesheet" href="https://nostri.chat/public/bundle.css"&gt;</pre>
