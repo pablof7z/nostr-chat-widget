@@ -297,6 +297,10 @@ class NstrAdapter {
     // Profiles
     //
     //
+    reqProfile(pubkey) {
+        this.#addProfileRequest(pubkey);
+    }
+    
     #addProfileRequest(pubkey, event=null) {
         if (this.#profileRequestQueue.includes(pubkey)) { return; }
         if (this.#requestedProfiles.includes(pubkey)) { return; }

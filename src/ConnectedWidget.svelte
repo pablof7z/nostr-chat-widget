@@ -168,6 +168,10 @@
     $: {
         connectedRelays = Object.values(connectivityStatus).filter(status => status === 'connected').length;
         totalRelays = Object.values(connectivityStatus).length;
+
+        if ($chatAdapter?.pubkey && !profiles[$chatAdapter.pubkey]) {
+            $chatAdapter.reqProfile($chatAdapter.pubkey)
+        }
     }
 
     $: profiles = $chatData.profiles;
@@ -180,6 +184,28 @@
         $selectedMessage = lastETagId;
 
         scrollDown()
+    }
+
+    let ownName;
+    $: ownName = $chatAdapter?.pubkey ? pubkeyName($chatAdapter.pubkey) : "";
+    
+    function pubkeyName(pubkey) {
+        let name;
+        
+        if (profiles[$chatAdapter.pubkey]) {
+            let self = profiles[$chatAdapter.pubkey];
+
+            // https://xkcd.com/927/
+            name = self.display_name ||
+                    self.displayName || 
+                    self.name ||
+                    self.nip05;
+            
+        }
+
+        if (!name) { name = `[${pubkey.slice(0, 6)}]`; }
+
+        return name;
     }
     
 </script>
@@ -194,7 +220,7 @@
 
     <div class="text-lg font-semibold">
         {#if $chatAdapter?.pubkey}
-            {profiles[$chatAdapter.pubkey]?.display_name || $chatAdapter.pubkey}
+            {ownName}
         {/if}
     </div>
 

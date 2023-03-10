@@ -77,14 +77,24 @@
         })
         await connect.init();
 
+        let windowTitle, currentUrl, currentDomain;
+
+        try {
+            windowTitle = window.document.title || 'Nostrichat';
+            currentUrl = new URL(window.location.href);
+            currentDomain = currentUrl.hostname;
+        } catch (e) {
+            currentUrl = window.location.href;
+            currentDomain = currentUrl;
+        }
+
         const connectURI = new ConnectURI({
             target: getPublicKey(key),
             relay: 'wss://nostr.vulpem.com',
             metadata: {
-                name: 'PSBT.io',
+                name: windowTitle,
                 description: '🔉🔉🔉',
-                url: 'https://psbt.io',
-                icons: ['https://example.com/icon.png'],
+                url: currentUrl,
             },
         });
 

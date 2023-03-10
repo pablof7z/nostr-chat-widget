@@ -15,7 +15,7 @@
     src="/public/bundle.js"
     data-website-owner-pubkey="fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52"
     data-chat-type="GLOBAL"
-    data-chat-tags="#nostrica"
+    data-chat-tags="nostrica"
     data-relays="wss://relay.f7z.io,wss://nos.lol,wss://relay.nostr.info,wss://nostr-pub.wellorder.net,wss://relay.current.fyi,wss://relay.nostr.band"
   ></script>
 
