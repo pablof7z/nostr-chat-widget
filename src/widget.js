@@ -7,6 +7,8 @@ const chatType = script.getAttribute('data-chat-type');
 let chatTags = script.getAttribute('data-chat-tags');
 let chatReferenceTags = script.getAttribute('data-chat-reference-tags');
 let relays = script.getAttribute('data-relays');
+let includeTagsInMessage = script.getAttribute('data-include-tags-in-message');
+let includeUrlInMessage = script.getAttribute('data-include-url-in-message');
 script.parentNode.insertBefore(div, script);
 
 if (!relays) {
@@ -24,6 +26,8 @@ const embed = new Widget({
 		chatType,
 		chatTags,
 		chatReferenceTags,
-		relays
+		relays,
+		includeTagsInMessage,
+		includeUrlInMessage,
 	},
 });

@@ -3,6 +3,7 @@
     import { onMount } from 'svelte';
     import NostrNote from './NostrNote.svelte';
     import * as animateScroll from "svelte-scrollto";
+    import slugify from 'slugify';
 
     let events = [];
     let responseEvents = [];
@@ -37,7 +38,7 @@
 
     async function sendMessage() {
         const input = document.getElementById('message-input');
-        const message = input.value;
+        let message = input.value;
         input.value = '';
         let extraParams = { tags: [] };
 
@@ -48,6 +49,24 @@
         if ($selectedMessage) {
             extraParams.tags.push(['e', $selectedMessage]);
             extraParams.tagPubKeys.push(getEventById($selectedMessage).pubkey);
+        } else {
+            if (chatConfiguration.includeTagsInMessage) {
+                let tagNames = [];
+                chatConfiguration.chatTags.forEach(tag => {
+                    tagNames.push('#' + slugify(tag, {
+                        replacement: '_',  // replace spaces with replacement character, defaults to `-`
+                        remove: true, // remove characters that match regex, defaults to `undefined`
+                        lower: true,      // convert to lower case, defaults to `false`
+                        strict: false,     // strip special characters except replacement, defaults to `false`
+                        locale: 'en',       // language code of the locale to use
+                        trim: true         // trim leading and trailing replacement chars, defaults to `true`
+                    }).replaceAll('-', '_'));
+                });
+                message += '\n\n' + tagNames.join(' ');
+            }
+            if (chatConfiguration.includeUrlInMessage) {
+                message += '\n\n' + document.location.href;
+            }
         }
 
         // if (rootNoteId) {
@@ -64,7 +83,7 @@
         //         extraParams.tags.push(['p', mostRecentEvent.pubkey]);
         //     }
         // }
-        
+
         const noteId = await $chatAdapter.send(message, extraParams);
 
         if (!rootNoteId) {
@@ -72,7 +91,7 @@
             localStorage.setItem('rootNoteId', rootNoteId);
         }
     }
-    
+
     async function inputKeyDown(event) {
         if (event.key === 'Enter') {
             sendMessage();
@@ -83,14 +102,14 @@
     function messageReceived(message) {
         const messageLastEventTag = message.tags.filter(tag => tag[0] === 'e').pop();
         let isThread;
-        
+
         if (chatConfiguration.chatType === 'GLOBAL') {
             isThread = message.tags.filter(tag => tag[0] === 'e').length >= 1;
         } else {
             const pubkeysTagged = message.tags.filter(tag => tag[0] === 'p').map(tag => tag[1]);
             isThread = new Set(pubkeysTagged).size >= 2;
         }
-        
+
         responses[message.id] = [];
 
         if (isThread) {
@@ -134,7 +153,7 @@
     }
 
     let rootNoteId;
-    
+
     onMount(() => {
         $chatAdapter.on('message', messageReceived);
 
@@ -181,7 +200,7 @@
 
         scrollDown()
     }
-    
+
 </script>
 
 <div class="

@@ -7,6 +7,8 @@
 	let websiteOwnerPubkey = 'fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52';
 	let chatTags = ['nostrica'];
 	let chatReferenceTags = [];
+	let includeTagsInMessage = false;
+	let includeUrlInMessage = false;
 	const relays = [
 		'wss://relay.f7z.io',
 		'wss://nos.lol',
@@ -17,6 +19,8 @@
 	];
 
 	$: currentTopic = [...chatTags, ...chatReferenceTags][0]
+	$: includeTagsInMessageEnabled = includeTagsInMessage
+	$: includeUrlInMessageEnabled = includeUrlInMessage
 
 	function currentTopic(topic) {
 		return [...chatTags, ...chatReferenceTags].includes(topic)
@@ -84,6 +88,8 @@
 					chatType,
 					chatTags,
 					chatReferenceTags,
+					includeTagsInMessage,
+					includeUrlInMessage,
 				}} {websiteOwnerPubkey} {relays} bind:chatStarted={chatStarted} />
 			</div>
 		</div>
@@ -151,8 +157,8 @@
 						<span class="text-2xl text-slate-500 font-extralight block">public discussion/support</span>
 					</span>
 				</div>
-				
-				
+
+
 			</h2>
 
 			<p class="
@@ -172,7 +178,7 @@
 						text-lg
 						font-semibold
 					">🔖 Topic-based chats</h3>
-					
+
 					<span class="inline-flex rounded-md">
 						<button type="button" class="
 							inline-flex items-center rounded-l-md border px-4 py-2 text-md font-medium
@@ -226,7 +232,71 @@
 								<span class="opacity-50 font-normal">https://</span>psbt.io
 							</button>
 					</span>
-					
+
+				</div>
+			</div>
+			<div class="flex flex-col lg:flex-row justify-between mt-10 gap-10">
+				<div class="flex flex-col items-center gap-4 border p-4 shadow-md rounded-lg w-fit lg:w-full">
+					<h3 class="
+						text-black
+						text-lg
+						font-semibold
+					">🏷 Include tags in message</h3>
+
+					<span class="inline-flex rounded-md">
+						<button type="button" class="
+							inline-flex items-center rounded-l-md border px-4 py-2 text-md font-medium
+							{!includeTagsInMessageEnabled ?
+								'text-white bg-orange-700 border-orange-900'
+							:
+								'border-gray-300 bg-white text-gray-700'}
+						" on:click={()=>{ includeTagsInMessage=false }}>
+							false
+						</button>
+
+						<button type="button" class="
+							inline-flex items-center rounded-r-md border px-4 py-2 text-md font-medium
+							{includeTagsInMessageEnabled ?
+								'text-white bg-orange-700 border-orange-900'
+							:
+								'border-gray-300 bg-white text-gray-700'}
+						" on:click={()=>{ includeTagsInMessage=true }}>
+							true
+						</button>
+					</span>
+				</div>
+
+				<div class="flex flex-col items-center gap-4 border p-4 shadow-md rounded-lg w-fit lg:w-full">
+					<h3 class="
+						text-black
+						text-lg
+						font-semibold
+					">🔗 Include url in message</h3>
+						<span class="inline-flex rounded-md">
+							<button type="button" class="
+								inline-flex items-center rounded-l-md border px-4 py-2 text-md font-medium
+								{!includeUrlInMessageEnabled ?
+								'text-white bg-orange-700 border-orange-900'
+							:
+								'border-gray-300 bg-white text-gray-700'}
+							:ring-indigo-500"
+								on:click={()=>{ includeUrlInMessage=false }}
+							>
+								false
+							</button>
+							<button type="button" class="
+								inline-flex items-center rounded-r-md border px-4 py-2 text-md font-medium
+								{includeUrlInMessageEnabled ?
+								'text-white bg-orange-700 border-orange-900'
+							:
+								'border-gray-300 bg-white text-gray-700'}
+							:ring-indigo-500"
+								on:click={()=>{ includeUrlInMessage=true }}
+							>
+								true
+							</button>
+					</span>
+
 				</div>
 			</div>
 		</div>
@@ -272,6 +342,10 @@
 	<b>data-chat-tags</b>="<span class="text-orange-500">#nostrica,#bitcoin"</span>
 	<span class="text-green-600">&lt;!-- Relays you'd like to use --&gt;</span>
 	<b>data-relays</b>="<span class="text-orange-500">wss://relay.f7z.io,wss://nos.lol,wss://relay.nostr.info,wss://nostr-pub.wellorder.net,wss://relay.current.fyi,wss://relay.nostr.band"</span>
+	<span class="text-green-600">&lt;!-- Include all tags in the message: true or false --&gt;</span>
+	<b>data-include-tags-in-message</b>="<span class="text-orange-500">false"</span>
+	<span class="text-green-600">&lt;!-- Include current url in the message: true or false --&gt;</span>
+	<b>data-include-url-in-message</b>="<span class="text-orange-500">false"</span>
 &gt;&lt;/script&gt;
 &lt;link rel="stylesheet" href="https://nostri.chat/public/bundle.css"&gt;</pre>
 		</div>

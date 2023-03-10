@@ -3,6 +3,8 @@
 
     export let websiteOwnerPubkey;
     export let chatType;
+    export let includeTagsInMessage;
+    export let includeUrlInMessage;
     export let chatTags;
     export let chatReferenceTags;
     export let relays;
@@ -38,7 +40,7 @@
 					text-purple-700">
                     NostriChat
                 </h1>
-                
+
                 <p class="text-gray-700 mb-3">
                     This is a FOSS chat app built on top of the Nostr protocol.
                 </p>
@@ -84,14 +86,16 @@
                         chatType,
                         chatTags,
                         chatReferenceTags,
+                        includeTagsInMessage,
+                        includeUrlInMessage,
                     }}
                     {relays}
                 />
             {/if}
         </div>
     {/if}
-    
-    
+
+
     <div class="self-end">
         <a href="#" class="text-white bg-purple-900 hover:bg-purple-700 w-full p-5 rounded-full flex-shrink-1 text-center font-semibold flex flex-row items-center gap-4" on:click|preventDefault={toggleChat}>
             <span class="tracking-wider">
