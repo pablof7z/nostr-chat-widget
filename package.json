@@ -39,6 +39,7 @@
 		"rollup-plugin-postcss": "^4.0.2",
 		"rollup-plugin-serve": "^2.0.2",
 		"rollup-plugin-terser": "^7.0.2",
+		"slugify": "^1.6.5",
 		"svelte-preprocess": "^5.0.1",
 		"svelte-qr": "^1.0.0",
 		"svelte-scrollto": "^0.2.0",
