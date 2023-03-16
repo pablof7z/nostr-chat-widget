@@ -64,7 +64,7 @@
         //         extraParams.tags.push(['p', mostRecentEvent.pubkey]);
         //     }
         // }
-        
+
         const noteId = await $chatAdapter.send(message, extraParams);
 
         if (!rootNoteId) {
@@ -72,7 +72,7 @@
             localStorage.setItem('rootNoteId', rootNoteId);
         }
     }
-    
+
     async function inputKeyDown(event) {
         if (event.key === 'Enter') {
             sendMessage();
@@ -83,14 +83,14 @@
     function messageReceived(message) {
         const messageLastEventTag = message.tags.filter(tag => tag[0] === 'e').pop();
         let isThread;
-        
+
         if (chatConfiguration.chatType === 'GLOBAL') {
             isThread = message.tags.filter(tag => tag[0] === 'e').length >= 1;
         } else {
             const pubkeysTagged = message.tags.filter(tag => tag[0] === 'p').map(tag => tag[1]);
             isThread = new Set(pubkeysTagged).size >= 2;
         }
-        
+
         responses[message.id] = [];
 
         if (isThread) {
@@ -119,7 +119,7 @@
     function scrollDown() {
         animateScroll.scrollToBottom({
             container: document.getElementById('messages-container'),
-            offset: 500,
+            offset: 999999, // hack, oh well, browsers suck
             duration: 50
         })
     }
@@ -134,7 +134,7 @@
     }
 
     let rootNoteId;
-    
+
     onMount(() => {
         $chatAdapter.on('message', messageReceived);
 
@@ -188,26 +188,26 @@
 
     let ownName;
     $: ownName = $chatAdapter?.pubkey ? pubkeyName($chatAdapter.pubkey) : "";
-    
+
     function pubkeyName(pubkey) {
         let name;
-        
+
         if (profiles[$chatAdapter.pubkey]) {
             let self = profiles[$chatAdapter.pubkey];
 
             // https://xkcd.com/927/
             name = self.display_name ||
-                    self.displayName || 
+                    self.displayName ||
                     self.name ||
                     self.nip05;
-            
+
         }
 
         if (!name) { name = `[${pubkey.slice(0, 6)}]`; }
 
         return name;
     }
-    
+
 </script>
 
 <div class="
@@ -260,17 +260,19 @@
     {/if}
 {/if}
 
-<div id="messages-container" class="overflow-scroll">
-    {#if $selectedMessage}
-        <NostrNote event={getEventById($selectedMessage)} {responses} {websiteOwnerPubkey} />
-    {:else}
-        {#each events as event}
-            <NostrNote {event} {responses} {websiteOwnerPubkey} />
-            {#if event.deleted}
-                👆 deleted
-            {/if}
-        {/each}
-    {/if}
+<div id="messages-container" class="overflow-auto -mx-4 px-4" style="height: 50vh; min-height: 300px;">
+    <div id="messages-container-inner">
+        {#if $selectedMessage}
+            <NostrNote event={getEventById($selectedMessage)} {responses} {websiteOwnerPubkey} />
+        {:else}
+            {#each events as event}
+                <NostrNote {event} {responses} {websiteOwnerPubkey} />
+                {#if event.deleted}
+                    👆 deleted
+                {/if}
+            {/each}
+        {/if}
+    </div>
 </div>
 
 

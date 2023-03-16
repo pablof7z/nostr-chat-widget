@@ -28,7 +28,7 @@
     {#if showChat}
         <div class="
 			shadow-2xl
-            bg-white mb-5 w-96 max-w-screen-sm text-black rounded-xl p-5 overflow-scroll
+            bg-white mb-5 w-96 max-w-screen-sm text-black rounded-xl p-5
             {minimizeChat ? 'hidden' : ''}
         " style="max-height: 80vh;">
             {#if !dismissedIntro}
@@ -38,7 +38,7 @@
 					text-purple-700">
                     NostriChat
                 </h1>
-                
+
                 <p class="text-gray-700 mb-3">
                     This is a FOSS chat app built on top of the Nostr protocol.
                 </p>
@@ -90,8 +90,8 @@
             {/if}
         </div>
     {/if}
-    
-    
+
+
     <div class="self-end">
         <a href="#" class="text-white bg-purple-900 hover:bg-purple-700 w-full p-5 rounded-full flex-shrink-1 text-center font-semibold flex flex-row items-center gap-4" on:click|preventDefault={toggleChat}>
             <span class="tracking-wider flex">

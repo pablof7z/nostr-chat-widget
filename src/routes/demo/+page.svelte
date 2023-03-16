@@ -7,7 +7,7 @@
 <body>
 
   <h1>Svelte embedding demo</h1>
-  
+
   <p>Below,we have inserted a <code>script</code> tag that should
   renter a Svelte component upon loading this page.</p>
 

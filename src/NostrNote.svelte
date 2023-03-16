@@ -19,7 +19,7 @@
     const byWebsiteOwner = !!websiteOwnerPubkey === event.pubkey;
 
     $: profiles = $chatData.profiles;
-    $: displayName = profiles[event.pubkey] && profiles[event.pubkey].display_name || event.pubkey;
+    $: displayName = profiles[event.pubkey] && profiles[event.pubkey].display_name || `[${event.pubkey.slice(0, 6)}]`;
     $: nip05 = profiles[event.pubkey] && profiles[event.pubkey].nip05;
 
     $: profilePicture = profiles[event.pubkey] && profiles[event.pubkey].picture || `https://robohash.org/${event.pubkey}.png?set=set1`;
@@ -50,13 +50,13 @@
         <div class="w-full overflow-hidden">
             <div class="flex flex-row justify-between text-center overflow-clip text-clip w-full">
             </div>
-            
+
             <div class="
                 max-h-64 text-base
                 cursor-pointer
                 border border-slate-200
                 {$selectedMessage === event.id ? 'bg-purple-700 text-white' : 'bg-slate-50 text-gray-500 hover:bg-slate-100'}
-                p-4 py-2 overflow-scroll rounded-2xl
+                p-4 py-2 overflow-auto rounded-2xl
             " on:click|preventDefault={()=>{selectMessage(event.id)}}>
                 {event.content}
             </div>

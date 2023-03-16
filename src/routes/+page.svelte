@@ -1,5 +1,6 @@
 <script>
 	import Container from '../Container.svelte';
+	import Widget from '../Widget.svelte';
 	import { chatAdapter } from '$lib/store';
 
 	let chatStarted;
@@ -31,21 +32,21 @@
 </svelte:head>
 
 <section class="
-	min-h-screen
+	lg:min-h-screen
 	text-white
 	bg-gradient-to-b from-orange-500 to-orange-800
 ">
-	<div class="min-h-screen mx-auto w-full lg:max-w-7xl py-5 xl:py-10
-		flex flex-col lg:flex-row
+	<div class="lg:min-h-screen mx-auto w-full lg:max-w-7xl py-5 xl:py-10
+		flex flex-col md:flex-row
 		gap-20 items-center px-4 lg:px-0
 		relative
 	">
 		<div class="
-			md:w-3/5 grid grid-cols-1 gap-10
+			md:w-7/12 gap-10
 		">
 			<section id="hero" style="min-height: 50vh;">
 				<h1 class="
-					text-4xl md:text-6xl
+					text-6xl
 					font-black
 					my-2
 				">Nostri.chat</h1>
@@ -72,13 +73,16 @@
 		</div>
 
 		<div class="
-			flex flex-row items-center justify-center
-			min-h-screen fixed
-		" style="margin-left: 50%;">
+			flex-row items-center justify-center
+			min-h-screen
+			hidden md:flex
+			md:w-5/12
+		">
 			<div class="
 				shadow-2xl
-				bg-white mb-5 w-96 max-w-screen-sm text-black rounded-3xl p-5 overflow-scroll
+				bg-white mb-5 w-96 max-w-screen-sm text-black rounded-3xl p-5 overflow-auto
 				flex flex-col justify-end
+				fixed
 			" style="{chatStarted ? 'max-height: 80vh;' : 'padding: 4rem 2rem !important;'}">
 				<Container chatConfiguration={{
 					chatType,
@@ -99,9 +103,9 @@
 	flex flex-col lg:flex-row
 	gap-20 px-4 lg:px-0
 	" style="min-height: 50vh;">
-	<div class="md:w-8/12 lg:w-3/5 grid grid-cols-1 gap-8">
+	<div class="md:w-7/12 flex flex-col gap-8">
 		<div>
-			<h1 class="text-7xl font-black">
+			<h1 class="text-6xl lg:text-7xl font-black">
 				Innovative modes
 			</h1>
 
@@ -151,8 +155,8 @@
 						<span class="text-2xl text-slate-500 font-extralight block">public discussion/support</span>
 					</span>
 				</div>
-				
-				
+
+
 			</h2>
 
 			<p class="
@@ -172,7 +176,7 @@
 						text-lg
 						font-semibold
 					">🔖 Topic-based chats</h3>
-					
+
 					<span class="inline-flex rounded-md">
 						<button type="button" class="
 							inline-flex items-center rounded-l-md border px-4 py-2 text-md font-medium
@@ -226,7 +230,7 @@
 								<span class="opacity-50 font-normal">https://</span>psbt.io
 							</button>
 					</span>
-					
+
 				</div>
 			</div>
 		</div>
@@ -243,7 +247,7 @@
 	flex flex-col lg:flex-row
 	gap-20 items-center px-4 lg:px-0
 	" style="min-height: 50vh;">
-		<div class="md:w-3/5 grid grid-cols-1 gap-8">
+		<div class="md:w-4/5 lg:w-3/5 grid grid-cols-1 gap-8">
 
 			<div>
 				<h1 class="text-7xl font-black">
@@ -260,7 +264,7 @@
 			<pre class ="
 				p-4
 				bg-white
-				overflow-scroll
+				overflow-auto
 			">
 &lt;script
 	src="https://nostri.chat/public/bundle.js"
@@ -278,6 +282,25 @@
 	</div>
 </section>
 
+<div class="md:hidden">
+	<Widget chatConfiguration={{
+		chatType,
+		chatTags,
+		chatReferenceTags,
+	}} {websiteOwnerPubkey} {relays} bind:chatStarted={chatStarted} />
+</div>
+
+<footer class="py-6 bg-orange-900 font-mono text-white text-center mt-12 px-10">
+	<div class="flex justify-center flex-row">
+		<div class="text-sm">
+			NOSTRI.CHAT
+			by
+			<a class="text-purple-50 hover:text-orange-400" href="https://pablof7z.com">
+				@pablof7z
+			</a>
+		</div>
+	</div>
+</footer>
 
 <style>
 	/* div { border: solid red 1px; } */
