@@ -88,7 +88,7 @@
 					chatType,
 					chatTags,
 					chatReferenceTags,
-				}} {websiteOwnerPubkey} {relays} bind:chatStarted={chatStarted} />
+				}} {relays} bind:chatStarted={chatStarted} />
 			</div>
 		</div>
 	</div>

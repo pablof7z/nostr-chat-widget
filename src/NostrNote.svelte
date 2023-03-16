@@ -1,6 +1,8 @@
 <script>
+    import { onMount } from 'svelte';
 	import { selectedMessage } from './lib/store';
-    import { chatData } from './lib/store';
+    import { chatData, chatAdapter } from './lib/store';
+    // import { prettifyContent } from '$lib/utils';
     export let event;
     export let responses;
     export let websiteOwnerPubkey;
@@ -16,13 +18,20 @@
         }
     }
 
+    // delay-fetch responses
+    onMount(() => {
+        $chatAdapter.delayedSubscribe(
+            {kinds: [1], '#e': [event.id]}
+        , 'responses', 500)
+    })
+
     const byWebsiteOwner = !!websiteOwnerPubkey === event.pubkey;
 
     $: profiles = $chatData.profiles;
     $: displayName = profiles[event.pubkey] && profiles[event.pubkey].display_name || `[${event.pubkey.slice(0, 6)}]`;
     $: nip05 = profiles[event.pubkey] && profiles[event.pubkey].nip05;
 
-    $: profilePicture = profiles[event.pubkey] && profiles[event.pubkey].picture || `https://robohash.org/${event.pubkey}.png?set=set1`;
+    $: profilePicture = profiles[event.pubkey] && profiles[event.pubkey].picture || `https://robohash.org/${event.pubkey.slice(0, 2)}.png?set=set1`;
 
     const repliedIds = event.tags.filter(e => e[0] === 'e').map(e => e[1]);
 

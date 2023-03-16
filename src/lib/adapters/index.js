@@ -25,6 +25,8 @@ class NstrAdapter {
     #profileRequestQueue = [];
     #requestedProfiles = [];
     #profileRequestTimer;
+    #delayedSubscriptions = {};
+    #delayedSubscriptionTimeouts = {};
 
     constructor(clientPubkey, {tags, referenceTags, type='DM', websiteOwnerPubkey, relays} = {}) {
         this.pubkey = clientPubkey;
@@ -71,8 +73,6 @@ class NstrAdapter {
 
                 break;
         }
-
-        console.log('filters', filters);
 
         if (filters && filters.length > 0) {
             this.subscribe(filters, (e) => { this.#emitMessage(e) })
@@ -170,6 +170,21 @@ class NstrAdapter {
         messageCallback(event)
     }
 
+    async delayedSubscribe(filters, family, timeout) {
+        this.#delayedSubscriptions[family] = this.#delayedSubscriptions[family] || []
+        this.#delayedSubscriptions[family].push(filters);
+
+        if (!this.#delayedSubscriptionTimeouts[family]) {
+            this.#delayedSubscriptionTimeouts[family] = setTimeout(() => {
+                delete this.#delayedSubscriptionTimeouts[family];
+                filters = this.#delayedSubscriptions[family];
+                delete this.#delayedSubscriptions[family];
+
+                this.subscribe(filters, (e) => { this.#emitMessage(e)});
+            }, timeout)
+        }
+    }
+
     async subscribe(filters, messageCallback=null) {
         if (!messageCallback) { messageCallback = (e) => { this.#emitMessage(e) } }
         return this.#_subscribe(filters, messageCallback)
@@ -198,14 +213,6 @@ class NstrAdapter {
         // decrypt
         if (event.kind === 4) {
             event.content = await this.decrypt(this.#websiteOwnerPubkey, event.content);
-        }
-
-        // if we have tags we were filtering for, filter here in case the relay doesn't support filtering
-        if (this.tags && this.tags.length > 0) {
-            if (!event.tags.find(t => t[0] === 't' && this.tags.includes(t[1]))) {
-                console.log(`discarded event not tagged with [${this.tags.join(', ')}], tags: ${event.tags.filter(t => t[0] === 't').map(t => t[1]).join(', ')}`);
-                return;
-            }
         }
 
         if (event.kind === 1) {

@@ -91,11 +91,16 @@
             isThread = new Set(pubkeysTagged).size >= 2;
         }
 
-        responses[message.id] = [];
+        if (!responses[message.id]) { responses[message.id] = [] };
 
         if (isThread) {
+            // get the last "e" tag, which is tagging the immediate parent
             const lastETag = message.tags.filter(tag => tag[0] === 'e').pop();
-            if (lastETag && lastETag[1] && responses[lastETag[1]]) {
+            if (lastETag && lastETag[1]) {
+                // if there is one, add it to the response
+                if (!responses[lastETag[1]]) {
+                    responses[lastETag[1]] = [];
+                }
                 responses[lastETag[1]].push(message);
             }
 
