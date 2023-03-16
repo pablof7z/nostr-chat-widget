@@ -41,7 +41,7 @@ class NstrAdapter {
         this.type = type;
         this.tags = tags;
         this.referenceTags = referenceTags;
-        
+
         // handle connection
         if (this.#pool) { this.#disconnect() }
         this.#connect()
@@ -50,7 +50,7 @@ class NstrAdapter {
 
         console.log('this.tags', this.tags);
         console.log('this.referenceTags', this.referenceTags);
-        
+
         // handle subscriptions
         // if this is DM type then subscribe to chats with this website owner
         switch (this.type) {
@@ -68,7 +68,7 @@ class NstrAdapter {
                 if (this.referenceTags && this.referenceTags.length > 0) {
                     filters.push({kinds: [1], '#r': this.referenceTags, limit: 20});
                 }
-                
+
                 break;
         }
 
@@ -120,7 +120,7 @@ class NstrAdapter {
             tags: [
                 ['p', this.#websiteOwnerPubkey],
                 ...tags
-            ],  
+            ],
         }
 
         return event;
@@ -147,7 +147,9 @@ class NstrAdapter {
 
         if (tagPubKeys) {
             for (let pubkey of tagPubKeys) {
-                event.tags.push(['p', pubkey]);
+                if (pubkey) {
+                    event.tags.push(['p', pubkey]);
+                }
             }
         }
 
@@ -227,7 +229,7 @@ class NstrAdapter {
                 // alert('unknown event kind ' + event.kind)
                 console.log('unknown event kind', event.kind, event);
         }
-        
+
     }
 
     subscribeToEventAndResponses(eventId) {
@@ -239,7 +241,7 @@ class NstrAdapter {
             // this.subscribeToResponses(e)
         })
     }
-    
+
     subscribeToResponses(event) {
         this.subscribe([
             {'#e': [event.id]},
@@ -257,7 +259,7 @@ class NstrAdapter {
             this.relayStatus[url] = 'disconnected';
         });
         this.#eventEmitter.emit('connectivity', this.relayStatus);
-        
+
         // console.log('connecting to relay', this.relayUrls);
         this.#pool = new RelayPool(this.relayUrls)
         this.#pool.on('open', (relay) => {
@@ -265,13 +267,13 @@ class NstrAdapter {
             this.relayStatus[relay.url] = 'connected';
             this.#eventEmitter.emit('connectivity', this.relayStatus);
         })
-        
+
         this.#pool.on('error', (relay, r, e) => {
             this.relayStatus[relay.url] = 'error';
             this.#eventEmitter.emit('connectivity', this.relayStatus);
             console.log('error from relay', relay.url, r, e)
         })
-        
+
         this.#pool.on('close', (relay, r) => {
             this.relayStatus[relay.url] = 'closed';
             this.#eventEmitter.emit('connectivity', this.relayStatus);
@@ -300,13 +302,13 @@ class NstrAdapter {
     reqProfile(pubkey) {
         this.#addProfileRequest(pubkey);
     }
-    
+
     #addProfileRequest(pubkey, event=null) {
         if (this.#profileRequestQueue.includes(pubkey)) { return; }
         if (this.#requestedProfiles.includes(pubkey)) { return; }
         this.#profileRequestQueue.push(pubkey);
         this.#requestedProfiles.push(pubkey);
-        
+
         if (!this.#profileRequestTimer) {
             this.#profileRequestTimer = setTimeout(() => {
                 this.#profileRequestTimer = null;

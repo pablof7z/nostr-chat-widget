@@ -39,10 +39,10 @@
         const input = document.getElementById('message-input');
         const message = input.value;
         input.value = '';
-        let extraParams = { tags: [] };
+        let extraParams = { tags: [], tagPubKeys: [] };
 
         // if this is the rootLevel we want to tag the owner of the site's pubkey
-        if (!rootNoteId) { extraParams.tagPubKeys = [websiteOwnerPubkey] }
+        if (!rootNoteId && websiteOwnerPubkey) { extraParams.tagPubKeys = [websiteOwnerPubkey] }
 
         // if we are responding to an event, we want to tag the event and the pubkey
         if ($selectedMessage) {
