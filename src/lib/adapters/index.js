@@ -50,9 +50,6 @@ class NstrAdapter {
 
         let filters = [];
 
-        console.log('this.tags', this.tags);
-        console.log('this.referenceTags', this.referenceTags);
-
         // handle subscriptions
         // if this is DM type then subscribe to chats with this website owner
         switch (this.type) {
