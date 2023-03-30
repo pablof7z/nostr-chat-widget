@@ -7,6 +7,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import css from "rollup-plugin-css-only";
 import serve from "rollup-plugin-serve";
+import json from "@rollup/plugin-json";
 import livereload from "rollup-plugin-livereload";
 import { terser } from "rollup-plugin-terser";
 import esformatter from "rollup-plugin-esformatter";
@@ -17,7 +18,7 @@ const production = true; //false;// !process.env.ROLLUP_WATCH;
 export default {
 	input: "src/widget.js",
 	output: {
-		file: "public/bundle.js",
+		file: "static/public/bundle.js",
 		format: "iife",
 		name: "app",
 		sourcemap: production,
@@ -42,6 +43,7 @@ export default {
 			dedupe: ["svelte"],
 			preferBuiltins: false
 		}),
+		json(),
 		commonjs(),
 
 		// export CSS in separate file for better performance

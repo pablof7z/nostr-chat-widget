@@ -1,5 +1,5 @@
 <script>
-    import { chatAdapter, chatData, selectedMessage } from './lib/store';
+    import { chatAdapter, chatData, selectedMessage, zapsPerMessage } from './lib/store';
     import { onMount } from 'svelte';
     import NostrNote from './NostrNote.svelte';
     import * as animateScroll from "svelte-scrollto";
@@ -129,6 +129,14 @@
         })
     }
 
+    function zapReceived(zap) {
+        const event = events.find(event => event.id === zap.zappedEvent);
+        if (!event) { return; }
+
+        if (!$zapsPerMessage[event.id]) $zapsPerMessage[event.id] = [];
+        $zapsPerMessage[event.id].push(zap);
+    }
+
     function reactionReceived(reaction) {
         const event = events.find(event => event.id === reaction.id);
         if (!event) { return; }
@@ -148,6 +156,7 @@
         })
 
         $chatAdapter.on('reaction', reactionReceived);
+        $chatAdapter.on('zap', zapReceived);
         $chatAdapter.on('deleted', (deletedEvents) => {
             deletedEvents.forEach(deletedEventId => {
                 const index = events.findIndex(event => event.id === deletedEventId);
@@ -217,8 +226,8 @@
 
 <div class="
     bg-purple-700 text-white
-    -m-5 mb-3
-    px-5 py-3
+    -mx-4 -mt-5 mb-3
+    px-4 py-3
     overflow-clip
     flex flex-row justify-between items-center
 ">
@@ -266,7 +275,7 @@
 {/if}
 
 <div id="messages-container" class="overflow-auto -mx-4 px-4" style="height: 50vh; min-height: 300px;">
-    <div id="messages-container-inner">
+    <div id="messages-container-inner" class="flex flex-col gap-4">
         {#if $selectedMessage}
             <NostrNote event={getEventById($selectedMessage)} {responses} {websiteOwnerPubkey} />
         {:else}
@@ -284,8 +293,8 @@
 <div class="flex flex-col">
     <div class="
         border-y border-y-slate-200
-        -mx-5 my-2 bg-slate-100 text-black text-sm
-        px-5 py-2
+        -mx-4 my-2 bg-slate-100 text-black text-sm
+        px-4 py-2
     ">
         {#if chatConfiguration.chatType === 'DM'}
             <b>Encrypted chat:</b>

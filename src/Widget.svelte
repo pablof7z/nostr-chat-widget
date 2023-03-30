@@ -24,11 +24,15 @@
     }
 </script>
 
-<div class="fixed bottom-5 right-5 mb-5 flex flex-col item-end font-sans">
+<div class="
+    fixed bottom-5 right-5 mb-5 flex flex-col item-end font-sans
+">
     {#if showChat}
         <div class="
 			shadow-2xl
-            bg-white mb-5 w-96 max-w-screen-sm text-black rounded-xl p-5
+            bg-white/90 backdrop-brightness-150 backdrop-blur-md mb-5 w-96 max-w-screen-sm text-black rounded-3xl p-5
+            overflow-auto
+            flex flex-col justify-end
             {minimizeChat ? 'hidden' : ''}
         " style="max-height: 80vh;">
             {#if !dismissedIntro}

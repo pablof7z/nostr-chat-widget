@@ -5,6 +5,7 @@ import { createEventDispatcher } from 'svelte';
 import EventEmitter from 'events';
 import * as uuid from 'uuid';
 import debug from 'debug';
+import { NDKEvent, zapInvoiceFromEvent } from 'nostr-dev-kit';
 
 const log = new debug('nostr:adapter');
 const profilesLog = new debug('nostr:adapter:profiles');
@@ -174,10 +175,27 @@ class NstrAdapter {
         if (!this.#delayedSubscriptionTimeouts[family]) {
             this.#delayedSubscriptionTimeouts[family] = setTimeout(() => {
                 delete this.#delayedSubscriptionTimeouts[family];
-                filters = this.#delayedSubscriptions[family];
+
+                // if there are more than 10 filters then we need to split them up
+                // into multiple subscriptions
+                let filters = this.#delayedSubscriptions[family];
                 delete this.#delayedSubscriptions[family];
 
-                this.subscribe(filters, (e) => { this.#emitMessage(e)});
+                // split filters into groups of 10
+                let groups = [];
+                groups = filters.reduce((groups, filter, index) => {
+                    if (index % 10 === 0) {
+                        groups.push([]);
+                    }
+                    groups[groups.length - 1].push(filter);
+                    return groups;
+                }, groups);
+
+                console.log(`turned ${filters.length} filters into ${groups.length} groups`);
+
+                groups.forEach((filters) => {
+                    this.subscribe(filters, (e) => { this.#emitMessage(e)});
+                });
             }, timeout)
         }
     }
@@ -191,6 +209,9 @@ class NstrAdapter {
         const subId = uuid.v4();
         this.#handlers[subId] = messageCallback;
         if (!Array.isArray(filters)) { filters = [filters] }
+
+
+
         this.#pool.subscribe(subId, filters);
         this.#pool.on('event', (relay, recSubId, e) => {
             this.onEvent(e, this.#handlers[recSubId])
@@ -212,16 +233,16 @@ class NstrAdapter {
             event.content = await this.decrypt(this.#websiteOwnerPubkey, event.content);
         }
 
-        if (event.kind === 1) {
-            if (!event.tags.find(t => t[0] === 'e')) {
-                // a top level message that we should subscribe to since responses won't tag the url
-                this.subscribe({ kinds: [1], '#e': [event.id] })
-            }
-        }
-
         let deletedEvents = []
         if (event.kind === 5) {
             deletedEvents = event.tags.filter(tag => tag[0] === 'e').map(tag => tag[1]);
+        }
+
+        let zap;
+        if (event.kind === 9735) {
+            const ndkEvent = new NDKEvent(null, event);
+            zap = zapInvoiceFromEvent(ndkEvent);
+            console.log(`received a zap invoice: ${zap}`, event);
         }
 
         switch (event.kind) {
@@ -229,6 +250,7 @@ class NstrAdapter {
             case 4: this.#eventEmitter.emit('message', event); break;
             case 5: this.#eventEmitter.emit('deleted', deletedEvents); break;
             case 7: this.#eventEmitter.emit('reaction', event); break;
+            case 9735: this.#eventEmitter.emit('zap', zap); break;
             default:
                 // alert('unknown event kind ' + event.kind)
                 console.log('unknown event kind', event.kind, event);

@@ -1,6 +1,6 @@
 {
 	"name": "nostri.chat",
-	"version": "0.1.2",
+	"version": "0.1.5",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "svelte-kit sync && svelte-package",
@@ -26,12 +26,16 @@
 	"dependencies": {
 		"@nostr-connect/connect": "^0.2.3",
 		"@rollup/plugin-commonjs": "^24.0.1",
+		"@rollup/plugin-json": "^6.0.0",
 		"@rollup/plugin-typescript": "^11.0.0",
 		"@sveltejs/adapter-node": "^1.1.7",
 		"@tailwindcss/forms": "^0.5.3",
 		"@tailwindcss/typography": "^0.5.9",
+		"emoji-regex": "^10.2.1",
 		"eventemitter3": "^5.0.0",
+		"light-bolt11-decoder": "^3.0.0",
 		"nostr": "^0.2.7",
+		"nostr-dev-kit": "file:../../nostr/ndk/nostr-dev-kit",
 		"nostr-tools": "^1.2.1",
 		"rollup-plugin-css-only": "^4.3.0",
 		"rollup-plugin-esformatter": "^3.0.0",
@@ -43,6 +47,8 @@
 		"svelte-qr": "^1.0.0",
 		"svelte-scrollto": "^0.2.0",
 		"uuid": "^9.0.0",
+		"webln": "^0.3.2",
+		"websocket-polyfill": "^0.0.3",
 		"ws": "^8.12.0"
 	}
 }

@@ -1,4 +1,5 @@
 <script>
+	import 'websocket-polyfill';
 	import Container from '../Container.svelte';
 	import Widget from '../Widget.svelte';
 	import { chatAdapter } from '$lib/store';
@@ -10,10 +11,10 @@
 	let chatReferenceTags = [];
 	const relays = [
 		'wss://relay.f7z.io',
-		'wss://nos.lol',
 		'wss://relay.nostr.info',
 		'wss://nostr-pub.wellorder.net',
-		'wss://relay.current.fyi',
+		'wss://relay.nos.lol',
+		'wss://nostr.walletofsatoshi.com',
 		'wss://relay.nostr.band',
 	];
 
@@ -80,7 +81,7 @@
 		">
 			<div class="
 				shadow-2xl
-				bg-white mb-5 w-96 max-w-screen-sm text-black rounded-3xl p-5 overflow-auto
+				bg-gray-100/90 backdrop-blur-md mb-5 w-96 max-w-screen-sm text-black rounded-3xl px-4 py-5 overflow-auto
 				flex flex-col justify-end
 				fixed
 			" style="{chatStarted ? 'max-height: 80vh;' : 'padding: 4rem 2rem !important;'}">
