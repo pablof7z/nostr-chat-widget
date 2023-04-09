@@ -1,5 +1,5 @@
 <script>
-    export let icon, amount, amountDisplay, event;
+    export let icon, amount, amountDisplay, event, mobilePR;
     import { zappingMessage } from './lib/store';
     import NDK, { NDKEvent, NDKNip07Signer } from 'nostr-dev-kit';
     import { requestProvider } from 'webln';
@@ -12,16 +12,30 @@
         const ndk = new NDK({ explicitRelayUrls: ['wss://nos.lol', 'wss://relay.nostr.band', 'wss://relay.damus.io', 'wss://nostr.mom', 'wss://no.str.cr'] });
         ndk.signer = signer;
         await ndk.connect();
-        const ndkEvent = new NDKEvent(ndk, event);
-        const pr = await ndkEvent.zap(amount * 1000);
+        let pr;
+        try {
+            const ndkEvent = new NDKEvent(ndk, event);
+            pr = await ndkEvent.zap(amount * 1000);
+        } catch (e) {
+            alert(e)
+            return;
+        }
+
+
+        let webln;
 
         try {
-            const webln = await requestProvider();
+            webln = await requestProvider();
+        } catch (err) {
+            mobilePR = pr;
+            return;
+        }
+
+        try {
             await webln.sendPayment(pr);
             $zappingMessage = null;
         } catch (err) {
-            $zappingMessage = null;
-            console.log(err);
+            mobilePR = pr;
         }
     }
 </script>

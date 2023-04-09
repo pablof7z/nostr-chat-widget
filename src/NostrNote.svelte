@@ -14,6 +14,7 @@
     let npub;
     let zappingIt;
     let hovering;
+    let mobilePR;
 
     let zappedAmount = 0;
 
@@ -114,26 +115,35 @@
                 }
                 flex items-center absolute ml-5 mt-10 z-10">
                 {#if zappingIt}
-                    <div class="flex flex-row items-stretch justify-between w-full">
-                        <div class="flex flex-col hover:bg-orange-500 text-white rounded-full w-12 h-12 items-center justify-center cursor-pointer">
-                            <ZapAmountButton icon="👍" amount={500} {event} />
+                    {#if mobilePR}
+                        <div class="flex flex-col gap-3 w-full">
+                            <a href={`lightning:${mobilePR}`} class="text-center w-full p-3 bg-black text-white rounded-t-xl">Open in wallet</a>
+                            <button class="bg-white rounder-b-xl p-3" on:click={() => { $zappingMessage = null; }}>
+                                Cancel
+                            </button>
                         </div>
-                        <div class="flex flex-col hover:bg-orange-500 text-white rounded-full w-12 h-12 items-center justify-center cursor-pointer">
-                            <ZapAmountButton icon="🤙" amount={2500} amountDisplay={'2.5k'} {event} />
+                    {:else}
+                        <div class="flex flex-row items-stretch justify-between w-full">
+                            <div class="flex flex-col hover:bg-orange-500 text-white rounded-full w-12 h-12 items-center justify-center cursor-pointer">
+                                <ZapAmountButton icon="👍" amount={500} {event} bind:mobilePR={mobilePR} />
+                            </div>
+                            <div class="flex flex-col hover:bg-orange-500 text-white rounded-full w-12 h-12 items-center justify-center cursor-pointer">
+                                <ZapAmountButton icon="🤙" amount={2500} amountDisplay={'2.5k'} {event} bind:mobilePR={mobilePR} />
+                            </div>
+                            <div class="flex flex-col hover:bg-orange-500 text-white rounded-full w-12 h-12 items-center justify-center cursor-pointer">
+                                <ZapAmountButton icon="🙌" amount={5000} amountDisplay={'5k'} {event} bind:mobilePR={mobilePR} />
+                            </div>
+                            <div class="flex flex-col hover:bg-orange-500 text-white rounded-full w-12 h-12 items-center justify-center cursor-pointer">
+                                <ZapAmountButton icon="🧡" amount={10000} amountDisplay={'10k'} {event} bind:mobilePR={mobilePR} />
+                            </div>
+                            <div class="flex flex-col hover:bg-orange-500 text-white rounded-full w-12 h-12 items-center justify-center cursor-pointer">
+                                <ZapAmountButton icon="🤯" amount={100000} amountDisplay={'100k'} {event} bind:mobilePR={mobilePR} />
+                            </div>
+                            <div class="flex flex-col hover:bg-orange-500 text-white rounded-full w-12 h-12 items-center justify-center cursor-pointer">
+                                <ZapAmountButton icon="😎" amount={1000000} amountDisplay={'1M'} {event} bind:mobilePR={mobilePR} />
+                            </div>
                         </div>
-                        <div class="flex flex-col hover:bg-orange-500 text-white rounded-full w-12 h-12 items-center justify-center cursor-pointer">
-                            <ZapAmountButton icon="🙌" amount={5000} amountDisplay={'5k'} {event} />
-                        </div>
-                        <div class="flex flex-col hover:bg-orange-500 text-white rounded-full w-12 h-12 items-center justify-center cursor-pointer">
-                            <ZapAmountButton icon="🧡" amount={10000} amountDisplay={'10k'} {event} />
-                        </div>
-                        <div class="flex flex-col hover:bg-orange-500 text-white rounded-full w-12 h-12 items-center justify-center cursor-pointer">
-                            <ZapAmountButton icon="🤯" amount={100000} amountDisplay={'100k'} {event} />
-                        </div>
-                        <div class="flex flex-col hover:bg-orange-500 text-white rounded-full w-12 h-12 items-center justify-center cursor-pointer">
-                            <ZapAmountButton icon="😎" amount={1000000} amountDisplay={'1M'} {event} />
-                        </div>
-                    </div>
+                    {/if}
                 {/if}
             </div>
 
