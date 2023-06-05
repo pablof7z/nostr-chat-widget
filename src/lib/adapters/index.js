@@ -5,7 +5,7 @@ import { createEventDispatcher } from 'svelte';
 import EventEmitter from 'events';
 import * as uuid from 'uuid';
 import debug from 'debug';
-import { NDKEvent, zapInvoiceFromEvent } from 'nostr-dev-kit';
+import { NDKEvent, zapInvoiceFromEvent } from '@nostr-dev-kit/ndk';
 
 const log = new debug('nostr:adapter');
 const profilesLog = new debug('nostr:adapter:profiles');

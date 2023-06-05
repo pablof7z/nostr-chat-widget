@@ -1,14 +1,13 @@
 <script>
     export let icon, amount, amountDisplay, event, mobilePR;
     import { zappingMessage } from './lib/store';
-    import NDK, { NDKEvent, NDKNip07Signer } from 'nostr-dev-kit';
+    import NDK, { NDKEvent, NDKNip07Signer } from '@nostr-dev-kit/ndk';
     import { requestProvider } from 'webln';
 
     let hover = false;
 
     async function zap() {
         const signer = new NDKNip07Signer();
-        const pubkey = await signer.configure(window);
         const ndk = new NDK({ explicitRelayUrls: ['wss://nos.lol', 'wss://relay.nostr.band', 'wss://relay.damus.io', 'wss://nostr.mom', 'wss://no.str.cr'] });
         ndk.signer = signer;
         await ndk.connect();
