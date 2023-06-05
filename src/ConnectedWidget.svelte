@@ -14,8 +14,12 @@
     let prevChatConfiguration;
 
     $: {
-        if (chatConfiguration !== prevChatConfiguration && prevChatConfiguration && $chatAdapter) {
-            $chatAdapter.setChatConfiguration(chatConfiguration.chatType, chatConfiguration.chatTags, chatConfiguration.chatReferenceTags);
+        if (chatConfiguration !== prevChatConfiguration && $chatAdapter) {
+            $chatAdapter.setChatConfiguration(
+                chatConfiguration.chatType,
+                chatConfiguration.chatTags,
+                chatConfiguration.chatReferenceTags,
+                chatConfiguration.chatId);
             events = [];
             responses = {};
             rootNoteId = null;
@@ -46,7 +50,7 @@
 
         // if we are responding to an event, we want to tag the event and the pubkey
         if ($selectedMessage) {
-            extraParams.tags.push(['e', $selectedMessage]);
+            extraParams.tags.push(['e', $selectedMessage, "wss://nos.lol", "root"]);
             extraParams.tagPubKeys.push(getEventById($selectedMessage).pubkey);
         }
 
@@ -86,6 +90,8 @@
 
         if (chatConfiguration.chatType === 'GLOBAL') {
             isThread = message.tags.filter(tag => tag[0] === 'e').length >= 1;
+        } else if (chatConfiguration.chatType === 'GROUP') {
+            isThread = message.tags.filter(tag => tag[0] === 'e' && tag[1] !== chatConfiguration.chatId).length >= 1;
         } else {
             const pubkeysTagged = message.tags.filter(tag => tag[0] === 'p').map(tag => tag[1]);
             isThread = new Set(pubkeysTagged).size >= 2;
@@ -147,6 +153,7 @@
     }
 
     let rootNoteId;
+    let channelMetadata = {};
 
     onMount(() => {
         $chatAdapter.on('message', messageReceived);
@@ -173,6 +180,10 @@
 
             chatData.set({ profiles, ...$chatData })
         })
+
+        $chatAdapter.on('channelMetadata', (event) => {
+            channelMetadata = JSON.parse(event.content);
+        })
     });
 
     let connectivityStatus = {};
@@ -188,14 +199,25 @@
         }
     }
 
+    let connectedChatId;
+
+    $: if (connectedChatId !== $chatAdapter?.chatId) {
+        connectedChatId = $chatAdapter?.chatId;
+        channelMetadata = {};
+    }
+
     $: profiles = $chatData.profiles;
 
     function selectParent() {
-        // get the last tagged event in the tags array of the current $selectedMessage
-        const lastETag = getEventById($selectedMessage).tags.filter(tag => tag[0] === 'e').pop();
-        const lastETagId = lastETag && lastETag[1];
+        if (chatConfiguration.chatType === 'GROUP') {
+            $selectedMessage = null;
+        } else {
+            // get the last tagged event in the tags array of the current $selectedMessage
+            const lastETag = getEventById($selectedMessage).tags.filter(tag => tag[0] === 'e').pop();
+            const lastETagId = lastETag && lastETag[1];
 
-        $selectedMessage = lastETagId;
+            $selectedMessage = lastETagId;
+        }
 
         scrollDown()
     }
@@ -254,6 +276,21 @@
     </span>
 </div>
 
+{#if channelMetadata.name}
+    <div class="flex flex-row gap-2 mb-3 bg-zinc-300 text-zinc-800 px-4 py-2 -mx-4 -mt-3">
+        {#if channelMetadata.picture}
+            <img src={channelMetadata.picture} class="w-12 h-12 rounded-full" />
+        {/if}
+
+        <div class="flex flex-col">
+            <div class="font-extrabold text-xl">{channelMetadata.name}</div>
+            {#if channelMetadata.about}
+                <div class="text-sm truncate font-regular">{channelMetadata.about}</div>
+            {/if}
+        </div>
+    </div>
+{/if}
+
 {#if $selectedMessage}
     {#if !getEventById($selectedMessage)}
         <h1>Couldn't find event with ID {$selectedMessage}</h1>
@@ -299,9 +336,12 @@
         {#if chatConfiguration.chatType === 'DM'}
             <b>Encrypted chat:</b>
             only your chat partner can see these messages.
-        {:else}
+        {:else if chatConfiguration.chatType === 'GROUP'}
             <b>Public chat:</b>
             anyone can see these messages.
+        {:else}
+            <b>Public notes:</b>
+            your followers see your messages on their timeline
         {/if}
     </div>
 

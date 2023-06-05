@@ -21,6 +21,7 @@ class NstrAdapter {
     referenceTags;
     type;
     #websiteOwnerPubkey;
+    chatId;
     relayUrls = [];
 
     #profileRequestQueue = [];
@@ -29,25 +30,24 @@ class NstrAdapter {
     #delayedSubscriptions = {};
     #delayedSubscriptionTimeouts = {};
 
-    constructor(clientPubkey, {tags, referenceTags, type='DM', websiteOwnerPubkey, relays} = {}) {
+    constructor(clientPubkey, {tags, referenceTags, type='DM', chatId, websiteOwnerPubkey, relays} = {}) {
         this.pubkey = clientPubkey;
         this.#websiteOwnerPubkey = websiteOwnerPubkey;
         this.relayUrls = relays
 
         if (type) {
-            this.setChatConfiguration(type, tags, referenceTags);
+            this.setChatConfiguration(type, tags, referenceTags, chatId);
         }
     }
 
-    setChatConfiguration(type, tags, referenceTags) {
-        log('chatConfiguration', {type, tags, referenceTags});
+    setChatConfiguration(type, tags, referenceTags, chatId) {
         this.type = type;
         this.tags = tags;
+        this.chatId = chatId;
         this.referenceTags = referenceTags;
 
         // handle connection
         if (this.#pool) { this.#disconnect() }
-        this.#connect()
 
         let filters = [];
 
@@ -61,6 +61,14 @@ class NstrAdapter {
                     'authors': [this.pubkey, this.#websiteOwnerPubkey]
                 });
                 break;
+            case 'GROUP':
+                if (this.chatId) {
+                    filters.push({
+                        kinds: [41, 42],
+                        "#e": [this.chatId],
+                        limit: 200,
+                    })
+                }
             case 'GLOBAL':
                 if (this.tags && this.tags.length > 0) {
                     filters.push({kinds: [1], '#t': this.tags, limit: 20});
@@ -73,6 +81,7 @@ class NstrAdapter {
         }
 
         if (filters && filters.length > 0) {
+            this.#connect()
             this.subscribe(filters, (e) => { this.#emitMessage(e) })
         }
     }
@@ -96,6 +105,8 @@ class NstrAdapter {
 
         if (this.type === 'DM') {
             event = await this.sendKind4(message, {tagPubKeys, tags});
+        } else if (this.type === 'GROUP') {
+            event = await this.sendKind42(message, {tagPubKeys, tags, chatId: this.chatId});
         } else {
             event = await this.sendKind1(message, {tagPubKeys, tags});
         }
@@ -120,6 +131,46 @@ class NstrAdapter {
                 ...tags
             ],
         }
+
+        return event;
+    }
+
+    async sendKind42(message, {tagPubKeys, tags, chatId} = {}) {
+        if (!tags) { tags = []; }
+
+        if (this.tags) {
+            this.tags.forEach((t) => tags.push(['t', t]));
+        }
+
+        // check if there is an e tag
+        const reply = !!tags.find((t) => t[0] === 'e');
+
+        if (!reply) {
+            tags.push(['e', chatId, "wss://nos.lol", reply ? "reply" : "root"]);
+        }
+
+        if (this.referenceTags) {
+            this.referenceTags.forEach((t) => tags.push(['r', t]));
+        }
+
+        let event = {
+            kind: 42,
+            created_at: Math.floor(Date.now() / 1000),
+            tags,
+            content: message,
+            pubkey: this.pubkey,
+        }
+
+        if (tagPubKeys) {
+            for (let pubkey of tagPubKeys) {
+                if (pubkey) {
+                    event.tags.push(['p', pubkey]);
+                }
+            }
+        }
+
+        event.id = getEventHash(event)
+        this.subscribeToEventAndResponses(event.id);
 
         return event;
     }
@@ -191,8 +242,6 @@ class NstrAdapter {
                     return groups;
                 }, groups);
 
-                console.log(`turned ${filters.length} filters into ${groups.length} groups`);
-
                 groups.forEach((filters) => {
                     this.subscribe(filters, (e) => { this.#emitMessage(e)});
                 });
@@ -246,7 +295,11 @@ class NstrAdapter {
         }
 
         switch (event.kind) {
-            case 1: this.#eventEmitter.emit('message', event); break;
+            case 1:
+            case 42:
+                this.#eventEmitter.emit('message', event); break;
+            case 41:
+                this.#eventEmitter.emit('channelMetadata', event); break;
             case 4: this.#eventEmitter.emit('message', event); break;
             case 5: this.#eventEmitter.emit('deleted', deletedEvents); break;
             case 7: this.#eventEmitter.emit('reaction', event); break;

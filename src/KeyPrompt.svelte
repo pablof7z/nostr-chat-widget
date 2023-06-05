@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte";
-    import QR from 'svelte-qr';
+    // import QR from 'svelte-qr';
     import { chatAdapter } from './lib/store';
     import NstrAdapterNip07 from './lib/adapters/nip07.js';
     import NstrAdapterNip46 from './lib/adapters/nip46.js';
@@ -66,7 +66,7 @@
             localStorage.setItem('nostrichat-nostr-connect-key', key);
             localStorage.setItem('nostrichat-nostr-connect-public-key', connectedPubKey);
             localStorage.setItem('nostrichat-type', 'nip-46');
-            
+
             console.log('connected to nostr connect relay')
             publicKey = connectedPubKey;
             chatAdapter.set(new NstrAdapterNip46(publicKey, key))
@@ -128,7 +128,7 @@
 
     <div class="bg-white w-full p-3"
         on:click|preventDefault={Nip46Copy}>
-        <QR text={nip46URI} />
+        <!-- <QR text={nip46URI} /> -->
     </div>
 
     <button class="

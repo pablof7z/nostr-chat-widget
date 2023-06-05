@@ -2,19 +2,17 @@
 	import 'websocket-polyfill';
 	import Container from '../Container.svelte';
 	import Widget from '../Widget.svelte';
-	import { chatAdapter } from '$lib/store';
+	import { chatAdapter } from '../lib/store';
 
 	let chatStarted;
-	let chatType = 'GLOBAL';
+	let chatType = 'GROUP';
 	let websiteOwnerPubkey = 'fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52';
-	let chatTags = ['bitcoin'];
+	let chatTags = [];
+	let chatId = '9cef2eead5d91df42eba09be363f1272107e911685126ea5e261ac2d93299478';
 	let chatReferenceTags = [];
 	const relays = [
 		'wss://relay.f7z.io',
-		'wss://relay.nostr.info',
-		'wss://nostr-pub.wellorder.net',
-		'wss://relay.nos.lol',
-		'wss://nostr.walletofsatoshi.com',
+		'wss://nos.lol',
 		'wss://relay.nostr.band',
 	];
 
@@ -87,6 +85,7 @@
 			" style="{chatStarted ? 'max-height: 80vh;' : 'padding: 4rem 2rem !important;'}">
 				<Container chatConfiguration={{
 					chatType,
+					chatId,
 					chatTags,
 					chatReferenceTags,
 				}} {relays} bind:chatStarted={chatStarted} />
@@ -150,14 +149,66 @@
 		<div class="flex flex-col gap-3">
 			<h2 class="text-3xl text-orange-600 font-black">
 				<div class="flex flex-row gap-2">
+					<span>🫂</span>
+					<span class="flex flex-col">
+						<span>Public chat groups</span>
+						<span class="text-2xl text-slate-500 font-extralight block">public groups</span>
+					</span>
+				</div>
+			</h2>
+
+			<p class="
+				text-xl text-gray-500 text-justify
+				font-light
+				leading-8
+			">
+				Embed NIP-28 public chat groups on your site.
+			</p>
+
+			<div class="flex flex-col lg:flex-row justify-between mt-10 gap-10 mb-6">
+				<div class="flex flex-col lg:w-1/2 items-center gap-4 border p-4 shadow-md rounded-lg w-fit">
+					<h3 class="
+						text-black
+						text-lg
+						font-semibold
+					">Group chat</h3>
+					<span class="inline-flex rounded-md">
+						<button type="button" class="
+							inline-flex items-center rounded-l-md border px-4 py-2 text-md font-medium
+							{chatType === 'GROUP' && chatId === '9cef2eead5d91df42eba09be363f1272107e911685126ea5e261ac2d93299478' ?
+							'text-white bg-orange-700 border-orange-900'
+						:
+							'border-gray-300 bg-white text-gray-700'}
+						:ring-indigo-500"
+							on:click={()=>{ chatType='GROUP'; chatTags=[]; chatId='9cef2eead5d91df42eba09be363f1272107e911685126ea5e261ac2d93299478' }}
+						>
+							#Test
+						</button>
+
+						<button type="button" class="
+							inline-flex items-center rounded-r-md border px-4 py-2 text-md font-medium
+							{chatType === 'GROUP' && chatId === 'a6f436a59fdb5e23c757b1e30478742996c54413df777843e0a731af56a96eea' ?
+							'text-white bg-orange-700 border-orange-900'
+						:
+							'border-gray-300 bg-white text-gray-700'}
+						:ring-indigo-500"
+							on:click={()=>{ chatType='GROUP'; chatTags=[]; chatId='a6f436a59fdb5e23c757b1e30478742996c54413df777843e0a731af56a96eea' }}
+						>
+							#NDK
+						</button>
+					</span>
+
+				</div>
+			</div>
+
+			<h2 class="text-3xl text-orange-600 font-black">
+				<div class="flex flex-row gap-2">
 					<span>🔖</span>
 					<span class="flex flex-col">
 						<span>Tagged Global Chat</span>
 						<span class="text-2xl text-slate-500 font-extralight block">public discussion/support</span>
 					</span>
 				</div>
-
-
 			</h2>
 
 			<p class="
@@ -262,6 +313,7 @@
 				</p>
 			</div>
 
+			<div class="text-xl font-semibold">Public group chat (GROUP)</div>
 			<pre class ="
 				p-4
 				bg-white
@@ -269,14 +321,37 @@
 			">
 &lt;script
 	src="https://nostri.chat/public/bundle.js"
-	<span class="text-green-600">// YOUR PUBKEY IN HEX FORMAT</span>
-	<b>data-website-owner-pubkey</b>="<span class="text-orange-500">YOUR_PUBKEY"</span>
-	<span class="text-green-600">// THE TYPE OF CHAT YOU WANT: GLOBAL or DMs</span>
-	<b>data-chat-type</b>="<span class="text-orange-500">GLOBAL" </span>
-	<span class="text-green-600">// If you use GLOBAL you can choose set a comma-separated list of hashtags</span>
-	<b>data-chat-tags</b>="<span class="text-orange-500">nostrica,bitcoin"</span>
-	<span class="text-green-600">// Relays you'd like to use, change this this as you wish</span>
-	<b>data-relays</b>="<span class="text-orange-500">wss://relay.f7z.io,wss://nos.lol,wss://relay.nostr.info,wss://nostr-pub.wellorder.net,wss://relay.current.fyi,wss://relay.nostr.band"</span>
+	<b>data-chat-type</b>="<span class="text-orange-500">GROUP</span>"
+	<b>data-chat-id</b>="<span class="text-orange-500">&lt;GROUP_ID_IN_HEX_FORMAT&gt;</span>"
+	<b>data-relays</b>="<span class="text-orange-500">wss://relay.f7z.io,wss://nos.lol,wss://relay.nostr.band</span>"
+&gt;&lt;/script&gt;
+&lt;link rel="stylesheet" href="https://nostri.chat/public/bundle.css"&gt;</pre>
+
+<div class="text-xl font-semibold">Public global notes (kind-1 short notes)</div>
+<pre class ="
+	p-4
+	bg-white
+	overflow-auto
+">
+&lt;script
+src="https://nostri.chat/public/bundle.js"
+<b>data-chat-type</b>="<span class="text-orange-500">GLOBAL</span>"
+<b>data-chat-tags</b>="<span class="text-orange-500">bitcoin</span>"
+<b>data-relays</b>="<span class="text-orange-500">wss://relay.f7z.io,wss://nos.lol,wss://relay.nostr.band</span>"
+&gt;&lt;/script&gt;
+&lt;link rel="stylesheet" href="https://nostri.chat/public/bundle.css"&gt;</pre>
+
+<div class="text-xl font-semibold">Encrypted DMs</div>
+			<pre class ="
+				p-4
+				bg-white
+				overflow-auto
+			">
+&lt;script
+src="https://nostri.chat/public/bundle.js"
+<b>data-chat-type</b>="<span class="text-orange-500">DM</span>"
+<b>data-website-owner-pubkey</b>="<span class="text-orange-500">YOUR_PUBKEY_IN_HEX_FORMAT</span>"
+<b>data-relays</b>="<span class="text-orange-500">wss://relay.f7z.io,wss://nos.lol,wss://relay.nostr.band</span>"
 &gt;&lt;/script&gt;
 &lt;link rel="stylesheet" href="https://nostri.chat/public/bundle.css"&gt;</pre>
 		</div>
@@ -285,10 +360,9 @@
 
 <div class="md:hidden">
 	<Widget chatConfiguration={{
-		chatType,
 		chatTags,
 		chatReferenceTags,
-	}} {websiteOwnerPubkey} {relays} bind:chatStarted={chatStarted} />
+	}} {websiteOwnerPubkey} {chatType} {chatId} {relays} bind:chatStarted={chatStarted} />
 </div>
 
 <footer class="py-6 bg-orange-900 font-mono text-white text-center mt-12 px-10">

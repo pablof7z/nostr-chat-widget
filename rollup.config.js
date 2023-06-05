@@ -3,6 +3,7 @@ import sveltePreprocess from "svelte-preprocess";
 import { vitePreprocess } from '@sveltejs/kit/vite';
 import tailwindcss from "tailwindcss";
 import autoprefixer from "autoprefixer";
+import nodePolyfills from 'rollup-plugin-polyfill-node';
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import css from "rollup-plugin-css-only";
@@ -22,6 +23,12 @@ export default {
 		format: "iife",
 		name: "app",
 		sourcemap: production,
+		globals: {
+			"https": "https",
+			"http": "http",
+			"net": "net",
+		}
+
 	},
 	plugins: [
 		// compile svelte with tailwindcss as preprocess (including autoprefixer)
@@ -45,6 +52,7 @@ export default {
 		}),
 		json(),
 		commonjs(),
+		nodePolyfills( /* options */ ),
 
 		// export CSS in separate file for better performance
 		css({ output: "bundle.css" }),
@@ -64,6 +72,6 @@ export default {
 		!production && livereload("public/"),
 
 		// minify bundles in production mode
-		// production && terser(),
+		production && terser(),
 	],
 };

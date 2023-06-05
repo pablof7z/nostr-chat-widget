@@ -6,9 +6,9 @@
     export let chatTags;
     export let chatReferenceTags;
     export let relays;
+    export let chatId;
 
     let showChat = false;
-    let dismissedIntro = true;
     let minimizeChat = false;
 
     function toggleChat() {
@@ -17,10 +17,6 @@
         } else {
             showChat = !showChat;
         }
-    }
-
-    function dismissIntro() {
-        dismissedIntro = true;
     }
 </script>
 
@@ -35,63 +31,16 @@
             flex flex-col justify-end
             {minimizeChat ? 'hidden' : ''}
         " style="max-height: 80vh;">
-            {#if !dismissedIntro}
-                <h1 class="
-					font-bold
-					text-2xl
-					text-purple-700">
-                    NostriChat
-                </h1>
-
-                <p class="text-gray-700 mb-3">
-                    This is a FOSS chat app built on top of the Nostr protocol.
-                </p>
-
-                <p class="text-gray-700 mb-3">
-                    Choose how you would like to chat:
-                </p>
-
-                <p class="text-gray-700 mb-3">
-                    You can use it to ask for help
-                    <span class="font-bold">PSBT.io</span>
-                    to the creators of this site or to
-                    anyone willing to help.
-                </p>
-
-                <p class="text-gray-700 mb-3">
-                    Keep in mind that this chat is public,
-                    anyone can read it, so don't exchange
-                    private information and use common-sense.
-                </p>
-
-                <button class="
-                    bg-purple-900
-                    hover:bg-purple-700
-                    w-full
-                    p-2
-                    py-4
-                    text-xl
-                    mt-3
-                    rounded-xl
-                    text-center
-                    font-semibold
-                    tracking-wide
-                    uppercase
-                    text-white
-                " on:click={dismissIntro}>
-                    Continue
-                </button>
-            {:else}
-                <Container
-                    {websiteOwnerPubkey}
-                    chatConfiguration={{
-                        chatType,
-                        chatTags,
-                        chatReferenceTags,
-                    }}
-                    {relays}
-                />
-            {/if}
+            <Container
+                {websiteOwnerPubkey}
+                chatConfiguration={{
+                    chatType,
+                    chatTags,
+                    chatId,
+                    chatReferenceTags,
+                }}
+                {relays}
+            />
         </div>
     {/if}
 

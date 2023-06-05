@@ -5,6 +5,7 @@ var script = document.currentScript;
 const websiteOwnerPubkey = script.getAttribute('data-website-owner-pubkey');
 const chatType = script.getAttribute('data-chat-type');
 let chatTags = script.getAttribute('data-chat-tags');
+let chatId = script.getAttribute('data-chat-id');
 let chatReferenceTags = script.getAttribute('data-chat-reference-tags');
 let relays = script.getAttribute('data-relays');
 script.parentNode.insertBefore(div, script);

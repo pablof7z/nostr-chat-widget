@@ -29,7 +29,7 @@
     // delay-fetch responses
     onMount(() => {
         $chatAdapter.delayedSubscribe(
-            {kinds: [1, 9735], '#e': [event.id]}
+            {kinds: [1, 42, 9735], '#e': [event.id]}
         , 'responses', 500)
     })
 
@@ -100,7 +100,7 @@
                     <p class="flex flex-col items-center my-4">
                         ⚡️
                         <span class="text-orange-500 font-semibold">
-                            {zappedAmount}
+                            {zappedAmount/1000}
                         </span>
                     </p>
                 {:else}
