@@ -11,7 +11,7 @@ let relays = script.getAttribute('data-relays');
 script.parentNode.insertBefore(div, script);
 
 if (!relays) {
-	relays = 'wss://relay.f7z.io,wss://nos.lol,wss://relay.nostr.info,wss://nostr-pub.wellorder.net,wss://relay.current.fyi,wss://relay.nostr.band'
+  relays = 'wss://relay.f7z.io,wss://nos.lol,wss://relay.nostr.info,wss://nostr-pub.wellorder.net,wss://relay.current.fyi,wss://relay.nostr.band'
 }
 
 relays = relays.split(',');
@@ -19,12 +19,13 @@ chatTags = chatTags ? chatTags.split(',') : [];
 chatReferenceTags = chatReferenceTags ? chatReferenceTags.split(',') : [];
 
 const embed = new Widget({
-	target: div,
-	props: {
-		websiteOwnerPubkey,
-		chatType,
-		chatTags,
-		chatReferenceTags,
-		relays
-	},
+  target: div,
+  props: {
+    websiteOwnerPubkey,
+    chatType,
+    chatTags,
+    chatId,
+    chatReferenceTags,
+    relays
+  },
 });
