@@ -248,7 +248,7 @@
 
 <div class="
     bg-purple-700 text-white
-    -mx-4 -mt-5 mb-3
+    -mx-5 -mt-5 mb-3
     px-4 py-3
     overflow-clip
     flex flex-row justify-between items-center
@@ -277,9 +277,9 @@
 </div>
 
 {#if channelMetadata.name}
-    <div class="flex flex-row gap-2 mb-3 bg-zinc-300 text-zinc-800 px-4 py-2 -mx-4 -mt-3">
+    <div class="flex flex-row gap-2 mb-3 bg-zinc-300 text-zinc-800 px-4 py-2 -mx-5 -mt-3">
         {#if channelMetadata.picture}
-            <img src={channelMetadata.picture} class="w-12 h-12 rounded-full" />
+            <img src={channelMetadata.picture} class="w-12 h-12 rounded-full" alt="Channel Picture"/>
         {/if}
 
         <div class="flex flex-col">
@@ -311,7 +311,7 @@
     {/if}
 {/if}
 
-<div id="messages-container" class="overflow-auto -mx-4 px-4" style="height: 50vh; min-height: 300px;">
+<div id="messages-container" class="overflow-auto -mx-4 px-4 relative top-[-12px] mb-[-20px]" style="height: calc(50vh + 12px); min-height: 300px;">
     <div id="messages-container-inner" class="flex flex-col gap-4">
         {#if $selectedMessage}
             <NostrNote event={getEventById($selectedMessage)} {responses} {websiteOwnerPubkey} />
