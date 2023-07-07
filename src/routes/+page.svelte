@@ -71,18 +71,8 @@
 			</section>
 		</div>
 
-		<div class="
-			flex-row items-center justify-center
-			min-h-screen
-			hidden md:flex
-			md:w-5/12
-		">
-			<div class="
-				shadow-2xl
-				bg-gray-100/90 backdrop-blur-md mb-5 w-96 max-w-screen-sm text-black rounded-3xl px-4 py-5 overflow-auto
-				flex flex-col justify-end
-				fixed
-			" style="{chatStarted ? 'max-height: 80vh;' : 'padding: 4rem 2rem !important;'}">
+		<div class="flex-row items-center justify-center min-h-screen hidden md:flex md:w-5/12">
+			<div class="shadow-2xl bg-gray-100/90 backdrop-blur-md mb-5 w-96 max-w-screen-sm text-black rounded-md p-0 overflow-auto flex flex-col justify-end fixed" style="{chatStarted ? 'max-height: 70vh;' : ''}">
 				<Container chatConfiguration={{
 					chatType,
 					chatId,

@@ -24,6 +24,7 @@ const embed = new Widget({
 		websiteOwnerPubkey,
 		chatType,
 		chatTags,
+		chatId,
 		chatReferenceTags,
 		relays
 	},
