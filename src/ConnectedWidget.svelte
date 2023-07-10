@@ -14,6 +14,7 @@
   let responses = {};
   let profiles = {};
 
+  export let startPage;
   export let websiteOwnerPubkey;
   export let chatConfiguration;
   let prevChatConfiguration;
@@ -344,7 +345,7 @@
 
 <div
   id="chat-messages"
-  class="flex-1 px-4 min-h-[384px] block overflow-y-hidden md:overflow-y-auto overflow-x-hidden"
+  class="flex-1 px-4 min-h-[192px] block overflow-y-hidden md:overflow-y-auto overflow-x-hidden"
 >
   {#if $selectedMessage}
     {#if !getEventById($selectedMessage)}
@@ -383,7 +384,7 @@
     class="overflow-auto overflow-x-hidden -mx-4 px-4 min-h-full h-full"
   >
   
-    <div id="messages-container-inner" class="flex flex-col gap-4">
+    <div id="messages-container-inner" class="flex flex-col {!$selectedMessage && "mt-96"} gap-4">
       {#if $selectedMessage}
       <div class="md:hidden px-2 py-4 mb-3">
         <button class="" on:click|preventDefault={selectParent}>
@@ -440,6 +441,18 @@
 
 <div id="chat-input-container" class="p-4">
   <div class="flex space-x-4 items-center">
+    {#if startPage == "chat"}
+    <button
+    title="Login"
+    class="bg-green-700 min-h-[40px] max-h-[40px] hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 text-white rounded-md px-4 py-2 cursor-pointer"
+    on:click|preventDefault={() => chatAdapter.set('')}
+  >
+  <svg transform="scale(-1,1)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+  </svg>
+    >
+  </button>
+    {/if}
     <input
       type="text"
       id="message-input"

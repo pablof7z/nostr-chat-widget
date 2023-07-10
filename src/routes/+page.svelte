@@ -1,376 +1,877 @@
 <script>
-	import 'websocket-polyfill';
-	import Container from '../Container.svelte';
-	import Widget from '../Widget.svelte';
-	import { chatAdapter } from '../lib/store';
+  import "websocket-polyfill";
+  import Container from "../Container.svelte";
+  import { onMount } from "svelte";
+  import { createPaletteFromColor } from "palettey";
 
-	let chatStarted;
-	let chatType = 'GROUP';
-	let websiteOwnerPubkey = 'fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52';
-	let chatTags = [];
-	let chatId = '9cef2eead5d91df42eba09be363f1272107e911685126ea5e261ac2d93299478';
-	let chatReferenceTags = [];
-	const relays = [
-		'wss://relay.f7z.io',
-		'wss://nos.lol',
-		'wss://relay.nostr.band',
-	];
+  let chatStarted;
+  let chatType = "GROUP";
+  let ustartPage = "chat";
+  let websiteOwnerPubkey =
+    "11d0d1b58d636848e4d19863970d36fa6b56f5e1cc0f376fa9ba049ea59125ee";
+  let chatTags = [];
+  let chatId =
+    "a6f436a59fdb5e23c757b1e30478742996c54413df777843e0a731af56a96eea";
+  let chatReferenceTags = [];
+  let relays = [
+    "wss://relay.f7z.io",
+    "wss://nos.lol",
+    "wss://relay.nostr.band",
+    "wss://relay.nostr.info",
+    "wss://nostr-pub.wellorder.net",
+    "wss://relay.current.fyi",
+  ];
 
-	$: currentTopic = [...chatTags, ...chatReferenceTags][0]
+  $: currentTopic = [...chatTags, ...chatReferenceTags][0];
 
-	function currentTopic(topic) {
-		return [...chatTags, ...chatReferenceTags].includes(topic)
-	}
+  function hasCurrentTopic(topic) {
+    return [...chatTags, ...chatReferenceTags].includes(topic);
+  }
+
+  onMount(() => {
+    window.addEventListener("scroll", function () {
+      const scrollHint = document.getElementById("scroll-hint");
+      if (window.scrollY > 64) {
+        scrollHint?.classList.add("opacity-0");
+      } else {
+        scrollHint?.classList.remove("opacity-0");
+      }
+    });
+  });
+
+  let snippetActive = false;
+  let showChat = false;
+  let minimizeChat = false;
+
+  $: chatType,
+    chatReferenceTags,
+    chatTags,
+    chatId,
+    relays,
+    ustartPage,
+    (showChat = false),
+    (snippetActive = false);
+
+  const toggleChat = () => {
+    if (showChat) {
+      minimizeChat = !minimizeChat;
+    } else {
+      showChat = !showChat;
+    }
+  };
+
+  let showBrandingSettings = false;
+  let stepper = 1;
+  let colorAccent500 = "";
+  let nostriChatSimplified = false;
+  let hideNostrIcon = false;
+  let type = -1;
+  let newRelay = "";
+  let newRelayList = [
+    "wss://relay.f7z.io",
+    "wss://nos.lol",
+    "wss://relay.nostr.band",
+    "wss://relay.nostr.info",
+    "wss://nostr-pub.wellorder.net",
+    "wss://relay.current.fyi",
+  ];
+  let startPage = -1;
+  let theTag = "";
+  let theOwnerPubkey = "";
+  let groupId = "";
+  let theSnippet = "";
+
+  $: type, (theTag = ""), (theOwnerPubkey = ""), (groupId = "");
+
+  function removeRelay(index) {
+    newRelayList.splice(index, 1);
+    newRelayList = [...newRelayList];
+  }
+
+  function addRelay() {
+    if (newRelay.trim() !== "") {
+      newRelayList.push(newRelay);
+      newRelayList = [...newRelayList];
+      newRelay = "";
+    }
+  }
+
+  let theStartPage = "";
+
+  function generateSnippet() {
+    let colors = [];
+    if (colorAccent500 !== "") {
+      const palette = createPaletteFromColor("purple", colorAccent500, {});
+      colors = Object.values(palette.purple);
+    }
+    if (startPage == 0) theStartPage = "login";
+    if (startPage == 1) theStartPage = "chat";
+    if (type == 0) {
+      theSnippet = `
+<script
+  src="https://nostri-chat-hosted.f9ofwt.click/public/bundle.js"
+  data-chat-type="GROUP"
+  data-chat-id="${groupId}"
+  data-hidenostricon="${hideNostrIcon}"
+  data-simplifynostrnext="${nostriChatSimplified}"
+  data-accentcolor="${colors.join(",")}"
+  data-relays="${newRelayList.join(",")}"
+  data-start-page="${theStartPage}"
+></\script>
+<link rel="stylesheet" href="https://nostri-chat-hosted.f9ofwt.click/public/bundle.css">`;
+    } else if (type == 1) {
+      theSnippet = `
+<script
+  src="https://nostri-chat-hosted.f9ofwt.click/public/bundle.js"
+  data-chat-type="GLOBAL"
+  data-chat-tags="${theTag}"
+  data-hidenostricon="${hideNostrIcon}"
+  data-simplifynostrnext="${nostriChatSimplified}"
+  data-accentcolor="${colors.join(",")}"
+  data-relays="${newRelayList.join(",")}"
+  data-start-page="${theStartPage}"
+></\script>
+<link rel="stylesheet" href="https://nostri-chat-hosted.f9ofwt.click/public/bundle.css">`;
+    } else if (type == 2) {
+      theSnippet = `
+<script
+  src="https://nostri-chat-hosted.f9ofwt.click/public/bundle.js"
+  data-chat-type="DM"
+  data-website-owner-pubkey="${theOwnerPubkey}"
+  data-hidenostricon="${hideNostrIcon}"
+  data-simplifynostrnext="${nostriChatSimplified}"
+  data-accentcolor="${colors.join(",")}"
+  data-relays="${newRelayList.join(",")}"
+  data-start-page="${theStartPage}"
+></\script>
+<link rel="stylesheet" href="https://nostri-chat-hosted.f9ofwt.click/public/bundle.css">`;
+    }
+    stepper = 2;
+  }
+
+  async function getAndFormatColors() {
+    if (colorAccent500 !== "") {
+      const palette = createPaletteFromColor("purple", colorAccent500, {});
+      Object.entries(palette.purple).forEach((entry) => {
+      const [step, color] = entry;
+      document.documentElement.style.setProperty(
+        `--nostri-chat-custom-accent-color-${step}`,
+        color
+      );
+    });
+    }
+  }
+
+  async function trySnippet() {
+    await getAndFormatColors();
+    if (stepper == 2) {
+      if (type == 0) {
+        chatType = "GROUP";
+        chatTags = [];
+        chatId = groupId;
+        relays = newRelayList;
+        ustartPage = theStartPage;
+      } else if (type == 1) {
+        chatType = "GROUP";
+        chatTags = [theTag];
+        chatId = "";
+        chatReferenceTags= [];
+        relays = newRelayList;
+        ustartPage = theStartPage;
+      } else if (type == 2) {
+        websiteOwnerPubkey = theOwnerPubkey;
+        chatType = "DM";
+        chatId = "";
+        chatReferenceTags = [];
+        relays = newRelayList;
+        ustartPage = theStartPage;
+      }
+      setTimeout(() => (snippetActive = true), 5);
+    }
+  }
+
+  async function toClipboard() {
+    let targetElement = document.getElementById("theSnippet");
+    let actionElement = document.getElementById("copysnippettoclipboard");
+    if (targetElement) {
+      const a = targetElement.textContent || "";
+      try {
+        await navigator.clipboard.writeText(a);
+        if (actionElement) {
+          actionElement.textContent = "👍";
+        }
+        setTimeout(() => {
+          if (actionElement) {
+            actionElement.textContent = "Copy Snippet";
+          }
+        }, 1750);
+      } catch (n) {
+        console.error("Failed to copy to clipboard:", n);
+      }
+    }
+  }
 </script>
 
 <svelte:head>
-	<title>Nostri.chat / A NOSTR chat widget you control</title>
-	<meta property="og:url" content="https://nostri.chat/">
-	<meta name="description" content="A chat widget you own, powered by nostr" />
-    <meta property="og:description" content="A chat widget you own, powered by nostr" />
+  <title>Nostri.chat / A NOSTR chat widget you control</title>
+  <meta property="og:url" content="https://nostri.chat/" />
+  <meta name="description" content="A chat widget you own, powered by nostr" />
+  <meta
+    property="og:description"
+    content="A chat widget you own, powered by nostr"
+  />
 </svelte:head>
 
-<section class="
-	lg:min-h-screen
-	text-white
-	bg-gradient-to-b from-orange-500 to-orange-800
-">
-	<div class="lg:min-h-screen mx-auto w-full lg:max-w-7xl py-5 xl:py-10
-		flex flex-col md:flex-row
-		gap-20 items-center px-4 lg:px-0
-		relative
-	">
-		<div class="
-			md:w-7/12 gap-10
-		">
-			<section id="hero" style="min-height: 50vh;">
-				<h1 class="
-					text-6xl
-					font-black
-					my-2
-				">Nostri.chat</h1>
+<main class="flex-1 overflow-y-auto scroll-smooth">
 
-				<h2 class="
-					text-2xl lg:text-4xl
-					text-bold
-				">A chat widget for your site, powered by nostr</h2>
+  <!-- Website Section Hero -->
 
-				<p class="
-					max-w-prose
-					text-2xl
-					text-gray-200
-					tracking-wide
-					leading-9
-					my-5
-				">
-					Simple, interoperable
-					communication with your visitors, in a way
-					that gives you and them complete ownership
-					over the data.
-				</p>
-			</section>
-		</div>
+  <section
+    id="hero"
+    class="pb-16 pt-12 bg-gradient-to-bl from-orange-500 to-orange-800 text-white relative flex justify-center items-center h-[100vh] overflow-hidden"
+  >
+    <div class="relative flex py-20 items-center">
+      <div class="max-w-3xl text-center sm:text-left mb-12 md:mb-6">
+        <h1 class="text-5xl lg:text-6xl font-bold mb-6">Nostri.chat</h1>
+        <h3 class="text-3xl">A chat widget for your site, powered by nostr</h3>
+      </div>
+    </div>
+    <div
+      id="scroll-hint"
+      class="absolute bottom-0 left-1/2 transform -translate-x-1/2 mb-24 md:mb-8"
+    >
+      <a href="#modes" class="text-white text-center hover:text-gray-300">
+        <svg class="animate-bounce w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </a>
+    </div>
+  </section>
 
-		<div class="flex-row items-center justify-center min-h-screen hidden md:flex md:w-5/12">
-			<div class="shadow-2xl bg-gray-100/90 backdrop-blur-md mb-5 w-96 max-w-screen-sm text-black rounded-md p-0 overflow-auto flex flex-col justify-end fixed" style="{chatStarted ? 'max-height: 70vh;' : ''}">
-				<Container chatConfiguration={{
-					chatType,
-					chatId,
-					chatTags,
-					chatReferenceTags,
-				}} {relays} bind:chatStarted={chatStarted} />
-			</div>
-		</div>
-	</div>
-</section>
+  <!-- Website Section Modes -->
 
-<section class="
-	min-h-screen
-	py-5
-	lg:py-16
-" style="min-height: 50vh;">
-	<div class="mx-auto w-full lg:max-w-7xl py-5 xl:py-10
-	flex flex-col lg:flex-row
-	gap-20 px-4 lg:px-0
-	" style="min-height: 50vh;">
-	<div class="md:w-7/12 flex flex-col gap-8">
-		<div>
-			<h1 class="text-6xl lg:text-7xl font-black">
-				Innovative modes
-			</h1>
+  <section id="modes" class="bg-gray-50 py-16 min-h-[100vh]">
+    <div class="container mx-auto px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto">
+        <div class="mb-8">
+          <h2 class="text-4xl lg:text-5xl font-semibold">Innovative modes</h2>
+          <p class="mt-2 text-xl font-light text-gray-900">
+            Because we use Nostr for communicating, Nostri.chat can use some
+            new, creative approaches to using chat widget, depending on what you
+            want to achieve.
+          </p>
+          <p class="mt-2 text-xl font-light">
+            Click on the buttons below to try it out!
+          </p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white rounded-lg shadow p-6">
+            <h4 class="text-2xl mb-3 text-orange-600 font-black">
+              💬 Encrypted 1-on-1
+            </h4>
+            <!--<p class="mb-3 text-lg font-light text-gray-900">An encrypted 1-on-1 chat to someone.</p>-->
+            {#if chatType === "DM"}
+              <button
+                class="rounded bg-white hover:bg-gray-50 text-lg px-4 w-full text-orange-600 py-2 border"
+              >
+                Active
+              </button>
+            {:else}
+              <button
+                class="rounded bg-orange-600 hover:bg-orange-700 text-lg px-4 w-full text-white py-2"
+                on:click={() => {
+                  chatType = "DM";
+                  chatId = "";
+                  chatTags = [];
+                  chatReferenceTags = [];
+                }}
+              >
+                Try
+              </button>
+            {/if}
+          </div>
+          <div class="bg-white rounded-lg shadow p-6">
+            <h4 class="text-2xl mb-3 text-orange-600 font-black">
+              🫂 Public groups
+            </h4>
+            <!--<p class="mb-3 text-lg font-light text-gray-900">Public NIP-28 group chats.</p>-->
+            <span class="inline-flex text-center rounded-md w-full">
+              <button
+                class="text-center rounded-l text-lg px-4 w-full border-r py-2
+                            {chatType === 'GROUP' &&
+                chatId ===
+                  '9cef2eead5d91df42eba09be363f1272107e911685126ea5e261ac2d93299478'
+                  ? 'bg-white hover:bg-gray-50 text-orange-600 border'
+                  : 'bg-orange-600 hover:bg-orange-700 text-white'}"
+                on:click={() => {
+                  chatType = "GROUP";
+                  chatTags = [];
+                  chatId =
+                    "9cef2eead5d91df42eba09be363f1272107e911685126ea5e261ac2d93299478";
+                }}
+                >#Test
+              </button>
+              <button
+                class="text-center rounded-r text-lg px-4 w-full border-l py-2
+                        {chatType === 'GROUP' &&
+                chatId ===
+                  'a6f436a59fdb5e23c757b1e30478742996c54413df777843e0a731af56a96eea'
+                  ? 'bg-white hover:bg-gray-50 text-orange-600 border'
+                  : 'bg-orange-600 hover:bg-orange-700 text-white'}"
+                on:click={() => {
+                  chatType = "GROUP";
+                  chatTags = [];
+                  chatId =
+                    "a6f436a59fdb5e23c757b1e30478742996c54413df777843e0a731af56a96eea";
+                }}
+                >#NDK
+              </button>
+            </span>
+          </div>
+          <div class="bg-white rounded-lg shadow p-6">
+            <h4 class="text-2xl mb-3 text-orange-600 font-black">
+              🔖 Topic-Based Chats
+            </h4>
+            <!--<p class="mb-3 text-lg font-light text-gray-900">A global chat on your website about a certain topic.</p>-->
+            <span class="inline-flex text-center rounded-md w-full">
+              <button
+                class="text-center rounded-l text-lg px-4 w-full border-r py-2
+                        {currentTopic === 'nostrica'
+                  ? 'bg-white hover:bg-gray-50 text-orange-600 border'
+                  : 'bg-orange-600 hover:bg-orange-700 text-white'}"
+                on:click={() => {
+                  chatType = "GROUP";
+                  chatTags = ["nostrica"];
+                  chatId = "";
+                  chatReferenceTags = [];
+                }}
+                >#nostrica
+              </button>
+              <button
+                class="text-center rounded-r text-lg px-4 w-full border-l py-2
+                        {currentTopic === 'bitcoin'
+                  ? 'bg-white hover:bg-gray-50 text-orange-600 border'
+                  : 'bg-orange-600 hover:bg-orange-700 text-white'}"
+                on:click={() => {
+                  chatType = "GROUP";
+                  chatTags = ["bitcoin"];
+                  chatId = "";
+                  chatReferenceTags = [];
+                }}
+                >#bitcoin
+              </button>
+            </span>
+          </div>
+          <div class="bg-white rounded-lg shadow p-6">
+            <h4 class="text-2xl mb-3 text-orange-600 font-black">
+              🌎 Website-Based Chats
+            </h4>
+            <!--<p class="mb-3 text-lg font-light text-gray-900">Click on the buttons below to try it out!</p>-->
+            <span class="inline-flex text-center rounded-md w-full">
+              <button
+                class="text-center rounded-l text-lg px-4 w-full border-r py-2
+                        {currentTopic === 'https://nostri.chat'
+                  ? 'bg-white hover:bg-gray-50 text-orange-600 border'
+                  : 'bg-orange-600 hover:bg-orange-700 text-white'}"
+                on:click={() => {
+                  chatType = "GROUP";
+                  chatId = "";
+                  chatTags = ["https://nostri.chat"];
+                  chatReferenceTags = [];
+                }}
+                ><span class="text-gray-400 font-light">https://</span
+                >nostri.chat
+              </button>
+              <button
+                class="text-center rounded-r text-lg px-4 w-full border-l py-2
+                        {currentTopic === 'https://psbt.io'
+                  ? 'bg-white hover:bg-gray-50 text-orange-600 border'
+                  : 'bg-orange-600 hover:bg-orange-700 text-white'}"
+                on:click={() => {
+                  chatType = "GROUP";
+                  chatId = "";
+                  chatTags = ["https://psbt.io"];
+                  chatReferenceTags = [];
+                }}
+                ><span class="text-gray-400 font-light">https://</span>psbt.io
+              </button>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-			<p class="
-				text-2xl font-extralight
-			">
-				Because we use Nostr for communicating,
-				<b>Nostri.chat</b>
-				can use some new, creative approaches to using chat widget,
-				depending on what you want to achieve.
-			</p>
-		</div>
+  <!-- Website Section Config -->
 
-		<div class="flex flex-col gap-3">
-			<h2 class="text-3xl text-orange-600 font-black">
-				Classic mode
-				<span class="text-2xl text-slate-500 font-extralight block">encrypted 1-on-1 chats</span>
-			</h2>
+  <section id="config" class="bg-gray-200 py-16 min-h-[100vh]">
+    <div class="container mx-auto px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto">
+        <div class="mb-8">
+          <h2 class="text-4xl lg:text-5xl font-semibold">Easy-peasy setup</h2>
+          <p class="mt-2 text-xl font-light text-gray-900">
+            Configure with our easy configurator, add the snippet to your
+            website and you're good to go!
+          </p>
+        </div>
 
-			<p class="
-				text-xl text-gray-500 text-justify
-				font-light
-				leading-8
-			">
-				Lorem ipsum dolor sit, amet consectetur adipisicing elit. Sapiente quae eveniet placeat, obcaecati nesciunt nam iure. Culpa omnis hic eaque illum alias iure autem atque? Distinctio facilis recusandae omnis expedita.
-			</p>
+        <!-- Configurator -->
 
-			{#if $chatAdapter}
-				{#if chatType === 'DM'}
-					<button class="px-4 rounded border-2 border-orange-700 py-2 text-orange-700 text-lg w-full font-semibold">
-						Active
-					</button>
-				{:else}
-					<button class="px-4 rounded bg-orange-700 py-2 text-white text-lg w-full font-semibold" on:click={()=>{ chatType='DM'; chatTags=[]; chatReferenceTags=[] }}>
-						Try it
-					</button>
-				{/if}
-			{/if}
-		</div>
+        {#if stepper == 1}
+          <form
+            on:submit|preventDefault={generateSnippet}
+            class="bg-white shadow rounded-lg p-8"
+          >
+            <div
+              class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-gray-200 sm:pt-5"
+            >
+              <label
+                for="startpage"
+                class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
+              >
+                Start Page
+              </label>
+              <div class="mt-1 sm:mt-0 sm:col-span-2">
+                <select
+                  bind:value={startPage}
+                  required
+                  id="startpage"
+                  name="startpage"
+                  class="max-w-lg focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
+                >
+                  <option value="0">Login</option>
+                  <option value="1">Chat (as Anonymous)</option>
+                </select>
+              </div>
+            </div>
+            <div
+              class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-gray-200 sm:pt-5"
+            >
+              <label
+                for="type"
+                class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
+              >
+                Type
+              </label>
+              <div class="mt-1 sm:mt-0 sm:col-span-2">
+                <select
+                  required
+                  bind:value={type}
+                  id="type"
+                  name="type"
+                  class="max-w-lg focus:ring-orange-500 focus:border-orange-500 block w-full shadow-sm sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
+                >
+                  <option value="0">Public Group Chat</option>
+                  <option value="1"
+                    >Public Global Notes (kind-1 short notes)</option
+                  >
+                  <option value="2">Encrypted DMs</option>
+                </select>
+              </div>
+            </div>
+            {#if type == 0}
+              <div
+                class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-gray-200 sm:pt-5"
+              >
+                <label
+                  for="groupidhex"
+                  class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
+                >
+                  Group ID (hex)
+                </label>
+                <div class="mt-1 sm:mt-0 sm:col-span-2">
+                  <input
+                    required
+                    bind:value={groupId}
+                    type="text"
+                    name="Group ID (hex)"
+                    id="groupidhex"
+                    class="block max-w-lg w-full shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm border-gray-300 rounded-md"
+                  />
+                </div>
+              </div>
+            {/if}
+            {#if type == 1}
+              <div
+                class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-gray-200 sm:pt-5"
+              >
+                <label
+                  for="tag"
+                  class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
+                >
+                  Tag (hashtag, without #)
+                </label>
+                <div class="mt-1 sm:mt-0 sm:col-span-2">
+                  <input
+                    required
+                    bind:value={theTag}
+                    type="text"
+                    name="Tag"
+                    id="tag"
+                    class="block max-w-lg w-full shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm border-gray-300 rounded-md"
+                  />
+                </div>
+              </div>
+            {/if}
+            {#if type == 2}
+              <div
+                class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-gray-200 sm:pt-5"
+              >
+                <label
+                  for="publickey"
+                  class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
+                >
+                  Your Public Key (hex)
+                </label>
+                <div class="mt-1 sm:mt-0 sm:col-span-2">
+                  <input
+                    required
+                    bind:value={theOwnerPubkey}
+                    type="text"
+                    name="Public Key (hex)"
+                    id="publickey"
+                    class="block max-w-lg w-full shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm border-gray-300 rounded-md"
+                  />
+                </div>
+              </div>
+            {/if}
+            <div
+              class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-gray-200 sm:pt-5"
+            >
+              <label
+                class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
+              >
+                Relays
+              </label>
+              <div>
+                <div>
+                  {#each newRelayList as relay, index}
+                    <div
+                      class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-gray-200 sm:pt-5"
+                    >
+                      <div class="inline-flex">
+                        <div class="mt-1 sm:mt-0 sm:col-span-2">
+                          <input
+                            type="text"
+                            value={relay}
+                            readonly
+                            class="block sm:min-w-[256px] max-w-xl w-full shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm border-gray-300 rounded-md"
+                          />
+                        </div>
+                        <div>
+                          <button
+                            type="button"
+                            on:click={() => removeRelay(index)}
+                            class="ml-2 text-red-500"
+                          >
+                            <svg
+                              class="h-5 w-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  {/each}
+                </div>
+                <div>
+                  <div
+                    class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-gray-200 sm:pt-5"
+                  >
+                    <div class="inline-flex">
+                      <div class="mt-1 sm:mt-0 sm:col-span-2">
+                        <input
+                          type="text"
+                          bind:value={newRelay}
+                          placeholder="Add a new relay"
+                          class="block max-w-lg sm:min-w-[256px] w-full shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm border-gray-300 rounded-md"
+                        />
+                      </div>
+                      <div>
+                        <button
+                          type="button"
+                          on:click={addRelay}
+                          class="ml-2 text-green-500"
+                        >
+                          <svg
+                            class="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-		<div class="flex flex-col gap-3">
-			<h2 class="text-3xl text-orange-600 font-black">
-				<div class="flex flex-row gap-2">
-					<span>🫂</span>
-					<span class="flex flex-col">
-						<span>Public chat groups</span>
-						<span class="text-2xl text-slate-500 font-extralight block">public groups</span>
-					</span>
-				</div>
-			</h2>
+            <button
+              type="button"
+              on:click={() => (showBrandingSettings = !showBrandingSettings)}
+              class="mt-2 mb-3 sm:mb-3 sm:mt-5 text-orange-700 text-center cursor-pointer hover:underline"
+              >Show Advanced Branding Settings</button
+            >
+            <div class={showBrandingSettings !== true && "hidden"}>
+              <div
+                class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-gray-200 sm:pt-5"
+              >
+                <label
+                  class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
+                >
+                  Turn "NostriChat" into more general "Chat"
+                </label>
+                <div class="mt-1 sm:mt-0 sm:col-span-2">
+                  <input
+                    bind:checked={nostriChatSimplified}
+                    type="checkbox"
+                    class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded"
+                  />
+                </div>
+              </div>
 
-			<p class="
-				text-xl text-gray-500 text-justify
-				font-light
-				leading-8
-			">
-				Embed NIP-28 public chat groups on your site.
-			</p>
+              <div
+                class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-gray-200 sm:pt-5"
+              >
+                <label
+                  class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
+                >
+                  Hide Nostr Icon
+                </label>
+                <div class="mt-1 sm:mt-0 sm:col-span-2">
+                  <input
+                    bind:checked={hideNostrIcon}
+                    type="checkbox"
+                    class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded"
+                  />
+                </div>
+              </div>
 
-			<div class="flex flex-col lg:flex-row justify-between mt-10 gap-10 mb-6">
-				<div class="flex flex-col lg:w-1/2 items-center gap-4 border p-4 shadow-md rounded-lg w-fit">
-					<h3 class="
-						text-black
-						text-lg
-						font-semibold
-					">Group chat</h3>
-					<span class="inline-flex rounded-md">
-						<button type="button" class="
-							inline-flex items-center rounded-l-md border px-4 py-2 text-md font-medium
-							{chatType === 'GROUP' && chatId === '9cef2eead5d91df42eba09be363f1272107e911685126ea5e261ac2d93299478' ?
-							'text-white bg-orange-700 border-orange-900'
-						:
-							'border-gray-300 bg-white text-gray-700'}
-						:ring-indigo-500"
-							on:click={()=>{ chatType='GROUP'; chatTags=[]; chatId='9cef2eead5d91df42eba09be363f1272107e911685126ea5e261ac2d93299478' }}
-						>
-							#Test
-						</button>
+              <div
+              class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-gray-200 sm:pt-5"
+            >
+              <label
+                class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
+              >
+                Hex Accent Color Base 500 (without #)
+              </label>
+              <div class="mt-1 sm:mt-0 sm:col-span-2">
+                <input
+                  bind:value={colorAccent500}
+                  type="text"
+                  class="block max-w-lg w-full shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm border-gray-300 rounded-md"
+                />
+              </div>
+            </div>
 
-						<button type="button" class="
-							inline-flex items-center rounded-r-md border px-4 py-2 text-md font-medium
-							{chatType === 'GROUP' && chatId === 'a6f436a59fdb5e23c757b1e30478742996c54413df777843e0a731af56a96eea' ?
-							'text-white bg-orange-700 border-orange-900'
-						:
-							'border-gray-300 bg-white text-gray-700'}
-						:ring-indigo-500"
-							on:click={()=>{ chatType='GROUP'; chatTags=[]; chatId='a6f436a59fdb5e23c757b1e30478742996c54413df777843e0a731af56a96eea' }}
-						>
-							#NDK
-						</button>
-					</span>
+            </div>
 
-				</div>
-			</div>
+            <div class="pt-2 sm:pt-5">
+              <button
+                type="submit"
+                class="rounded bg-orange-600 hover:bg-orange-700 text-lg px-4 w-full text-white py-2"
+                >Submit</button
+              >
+            </div>
+          </form>
+        {:else if stepper == 2}
+          <form
+            on:submit|preventDefault={generateSnippet}
+            class="bg-white shadow rounded-lg p-8"
+          >
+            <div>
+              <button
+                type="button"
+                on:click={() => (stepper = 1)}
+                class="rounded bg-orange-600 hover:bg-orange-700 text-lg px-4 w-full text-white py-2"
+                >Back</button
+              >
+            </div>
+            <div class="sm:pt-5">
+              <p class="mt-2 text-xl font-light text-gray-900">
+                Add this snippet to your website:
+              </p>
+              <pre id="theSnippet" class="font-mono overflow-x-auto">
+                        {theSnippet}
+                    </pre>
+              <button
+                id="copysnippettoclipboard"
+                on:click={toClipboard}
+                type="button"
+                class="mt-2 rounded bg-white hover:bg-gray-50 text-lg px-4 w-full text-orange-600 py-2 border"
+                >Copy Snippet</button
+              >
+              {#if snippetActive === true}
+                <button
+                  class="mt-2 rounded bg-white hover:bg-gray-50 text-lg px-4 w-full text-orange-600 py-2 border"
+                >
+                  Active
+                </button>
+              {:else}
+                <button
+                  class="mt-2 rounded bg-orange-600 hover:bg-orange-700 text-lg px-4 w-full text-white py-2"
+                  on:click={trySnippet}
+                >
+                  Try <span class="text-sm">(Experimental)</span>
+                </button>
+              {/if}
+            </div>
+          </form>
+        {/if}
+      </div>
+    </div>
+  </section>
+  <footer
+    id="footer"
+    class="bg-orange-700 font-mono text-white text-center px-10 py-6"
+  >
+    <span
+      ><a href="https://nostri.chat" class="hover:text-orange-500"
+        >NOSTRI.CHAT</a
+      >
+      by
+      <a href="https://pablof7z.com" class="hover:text-orange-500">@pablof7z</a
+      ></span
+    >,
+    <span
+      >this fork by <a href="https://f9ofwt.click" class="hover:text-orange-500"
+        >@f9ofwt</a
+      ></span
+    >
+  </footer>
+</main>
 
-			<h2 class="text-3xl text-orange-600 font-black">
-				<div class="flex flex-row gap-2">
-					<span>🔖</span>
-					<span class="flex flex-col">
-						<span>Tagged Global Chat</span>
-						<span class="text-2xl text-slate-500 font-extralight block">public discussion/support</span>
-					</span>
-				</div>
-			</h2>
+<!-- Chat Widget -->
 
-			<p class="
-				text-xl text-gray-500 text-justify
-				font-light
-				leading-8
-			">
-				Imagine having a global chat on your website about a certain topic.
-				Anyone can participate, from your website or from any Nostr client.
-			</p>
-
-
-			<div class="flex flex-col lg:flex-row justify-between mt-10 gap-10">
-				<div class="flex flex-col items-center gap-4 border p-4 shadow-md rounded-lg w-fit lg:w-full">
-					<h3 class="
-						text-black
-						text-lg
-						font-semibold
-					">🔖 Topic-based chats</h3>
-
-					<span class="inline-flex rounded-md">
-						<button type="button" class="
-							inline-flex items-center rounded-l-md border px-4 py-2 text-md font-medium
-							{currentTopic === 'nostrica' ?
-								'text-white bg-orange-700 border-orange-900'
-							:
-								'border-gray-300 bg-white text-gray-700'}
-						" on:click={()=>{ chatType='GLOBAL'; chatTags=['nostrica']; chatReferenceTags=[] }}>
-							#nostrica
-						</button>
-
-						<button type="button" class="
-							inline-flex items-center rounded-r-md border px-4 py-2 text-md font-medium
-							{currentTopic === 'bitcoin' ?
-								'text-white bg-orange-700 border-orange-900'
-							:
-								'border-gray-300 bg-white text-gray-700'}
-						" on:click={()=>{ chatType='GLOBAL'; chatTags=['bitcoin']; chatReferenceTags=[] }}>
-							#bitcoin
-						</button>
-					</span>
-				</div>
-
-				<div class="flex flex-col items-center gap-4 border p-4 shadow-md rounded-lg w-fit lg:w-full">
-					<h3 class="
-						text-black
-						text-lg
-						font-semibold
-					">🌎 Website-based chats</h3>
-						<span class="inline-flex rounded-md">
-							<button type="button" class="
-								inline-flex items-center rounded-l-md border px-4 py-2 text-md font-medium
-								{currentTopic === 'https://nostri.chat' ?
-								'text-white bg-orange-700 border-orange-900'
-							:
-								'border-gray-300 bg-white text-gray-700'}
-							:ring-indigo-500"
-								on:click={()=>{ chatType='GLOBAL'; chatTags=[]; chatReferenceTags=['https://nostri.chat'] }}
-							>
-								<span class="opacity-50 font-normal">https://</span>nostri.chat
-							</button>
-							<button type="button" class="
-								inline-flex items-center rounded-r-md border px-4 py-2 text-md font-medium
-								{currentTopic === 'https://psbt.io' ?
-								'text-white bg-orange-700 border-orange-900'
-							:
-								'border-gray-300 bg-white text-gray-700'}
-							:ring-indigo-500"
-								on:click={()=>{ chatType='GLOBAL'; chatTags=[]; chatReferenceTags=['https://psbt.io'] }}
-							>
-								<span class="opacity-50 font-normal">https://</span>psbt.io
-							</button>
-					</span>
-
-				</div>
-			</div>
-		</div>
-	</div>
-</section>
-
-<section class="
-	min-h-screen
-	py-5
-	lg:py-16
-	bg-slate-100
-" style="min-height: 50vh;">
-	<div class="mx-auto w-full lg:max-w-7xl py-5 xl:py-10
-	flex flex-col lg:flex-row
-	gap-20 items-center px-4 lg:px-0
-	" style="min-height: 50vh;">
-		<div class="md:w-4/5 lg:w-3/5 grid grid-cols-1 gap-8">
-
-			<div>
-				<h1 class="text-7xl font-black">
-					Easy-peasy setup
-				</h1>
-
-				<p class="
-					text-2xl font-extralight
-				">
-					Just drop this snippet on your website and you're good to go.
-				</p>
-			</div>
-
-			<div class="text-xl font-semibold">Public group chat (GROUP)</div>
-			<pre class ="
-				p-4
-				bg-white
-				overflow-auto
-			">
-&lt;script
-	src="https://nostri.chat/public/bundle.js"
-	<b>data-chat-type</b>="<span class="text-orange-500">GROUP</span>"
-	<b>data-chat-id</b>="<span class="text-orange-500">&lt;GROUP_ID_IN_HEX_FORMAT&gt;</span>"
-	<b>data-relays</b>="<span class="text-orange-500">wss://relay.f7z.io,wss://nos.lol,wss://relay.nostr.band</span>"
-&gt;&lt;/script&gt;
-&lt;link rel="stylesheet" href="https://nostri.chat/public/bundle.css"&gt;</pre>
-
-<div class="text-xl font-semibold">Public global notes (kind-1 short notes)</div>
-<pre class ="
-	p-4
-	bg-white
-	overflow-auto
-">
-&lt;script
-src="https://nostri.chat/public/bundle.js"
-<b>data-chat-type</b>="<span class="text-orange-500">GLOBAL</span>"
-<b>data-chat-tags</b>="<span class="text-orange-500">bitcoin</span>"
-<b>data-relays</b>="<span class="text-orange-500">wss://relay.f7z.io,wss://nos.lol,wss://relay.nostr.band</span>"
-&gt;&lt;/script&gt;
-&lt;link rel="stylesheet" href="https://nostri.chat/public/bundle.css"&gt;</pre>
-
-<div class="text-xl font-semibold">Encrypted DMs</div>
-			<pre class ="
-				p-4
-				bg-white
-				overflow-auto
-			">
-&lt;script
-src="https://nostri.chat/public/bundle.js"
-<b>data-chat-type</b>="<span class="text-orange-500">DM</span>"
-<b>data-website-owner-pubkey</b>="<span class="text-orange-500">YOUR_PUBKEY_IN_HEX_FORMAT</span>"
-<b>data-relays</b>="<span class="text-orange-500">wss://relay.f7z.io,wss://nos.lol,wss://relay.nostr.band</span>"
-&gt;&lt;/script&gt;
-&lt;link rel="stylesheet" href="https://nostri.chat/public/bundle.css"&gt;</pre>
-		</div>
-	</div>
-</section>
-
-<div class="md:hidden">
-	<Widget chatConfiguration={{
-		chatTags,
-		chatReferenceTags,
-	}} {websiteOwnerPubkey} {chatType} {chatId} {relays} bind:chatStarted={chatStarted} />
+<div id="_chat-widget-container" class="font-sans">
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <div
+    on:click|preventDefault={toggleChat}
+    class="text-white cursor-pointer shadow-md bg-purple-900 hover:bg-purple-700 w-full p-4 rounded-full flex-shrink-1 text-center font-semibold flex flex-row items-center gap-4"
+  >
+    <span class="tracking-wider flex">
+      {#if nostriChatSimplified == !true}
+        <span class="text-white">Nostri</span>
+      {/if}
+      <span
+        class={nostriChatSimplified == !true ? "text-purple-300" : "text-white"}
+        >Chat</span
+      >
+    </span>
+    {#if hideNostrIcon == !true}
+      <svg
+        fill="#ffffff"
+        version="1.1"
+        id="Capa_1"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        width="25px"
+        height="25px"
+        viewBox="0 0 571.004 571.004"
+        xml:space="preserve"
+      >
+        <g
+          ><g
+            ><path
+              d="M533.187,269.019c-1.432-1.746-2.219-3.876-1.252-5.993c1.868-4.08,0.611-7.658-0.931-11.465 c-0.877-2.167-0.796-4.716-1.15-7.095c-0.221-1.493-0.057-3.199-0.742-4.435c-1.775-3.199-3.812-6.275-5.949-9.245 c-2.681-3.717-5.564-7.291-8.38-10.914c-3.325-4.284-6.581-8.633-10.09-12.766c-0.706-0.833-2.604-1.42-3.607-1.085 c-2.411,0.808-4.732,2.052-6.874,3.452c-2.771,1.812-5.435,3.317-8.928,3.713c-3.953,0.453-8.062,1.403-11.604,3.154 c-5.189,2.562-9.747,6.401-14.924,9c-4.913,2.464-8.328,6.112-11.184,10.567c-0.783,1.22-1.705,2.371-2.685,3.444 c-3.252,3.574-5.549,7.629-7.051,12.248c-1.154,3.554-2.378,7.226-4.373,10.322c-1.963,3.044-3.256,6.194-4.162,9.601 c-0.285,1.065-0.44,2.167-0.656,3.251c-2.212-0.539-4.19-0.873-6.06-1.518c-1.709-0.592-3.684-1.15-4.879-2.375 c-2.979-3.052-6.528-5.059-10.388-6.577c-3.448-1.354-6.581-3.06-9.441-5.496c-1.514-1.29-3.771-1.738-5.721-2.489 c-1.419-0.547-3.043-0.714-4.3-1.501c-3.439-2.146-6.639-4.68-10.11-6.765c-2.256-1.359-4.737-2.542-7.271-3.166 c-1.722-0.424-2.293-0.865-2.216-2.599c0.241-5.227-0.832-10.175-3.235-14.872c-2.855-5.582-8.723-8.625-14.777-7.589 c-2.697,0.461-5.573,1.347-8.128,0.833c-3.329-0.669-6.516-2-10.028-1.861c-0.612,0.025-1.31-0.437-1.864-0.82 c-4.076-2.832-8.152-5.663-12.163-8.584c-1.489-1.085-2.782-1.154-4.442-0.322c-1.221,0.612-2.705,0.955-4.08,0.967 c-6.047,0.062-12.098-0.082-18.148-0.077c-5.173,0.004-10.498,1.815-15.377-1.399c-0.241-0.159-0.588-0.216-0.886-0.221 c-3.023-0.028-4.488-1.632-5.096-4.524c-0.171-0.82-1.436-1.971-2.236-2c-3.986-0.143-7.984-0.041-11.971,0.139 c-2.187,0.102-4.619,0.004-6.483,0.922c-3.941,1.942-7.556,4.533-11.355,6.773c-1.505,0.889-3.023,1.085-3.872-0.763 c0.979-1.261,2.337-2.272,2.627-3.525c0.771-3.37-3.705-7.181-6.969-6.059c-1.498,0.514-3.003,1.208-4.272,2.138 c-2.464,1.807-4.725,3.896-7.144,5.769c-3.011,2.33-6.055,4.655-10.449,4.737c0.983-3.753-1.718-5.104-4.108-6.597 c-1.094-0.686-2.293-1.281-3.525-1.652c-3.276-1-6.348-0.763-8.956,1.828c-2.158,2.142-3.488,2.179-6.014,0.367 c-3.081-2.208-3.986-2.175-7.128,0c-1.122,0.775-2.346,1.832-3.586,1.926c-4.268,0.318-6.646,3.052-8.931,6.132 c-1.632,2.203-3.244,4.472-5.173,6.405c-4.378,4.39-8.911,8.629-13.48,12.815c-0.608,0.559-1.95,0.873-2.709,0.608 c-3.378-1.191-5.582-3.823-6.899-7.001c-2.521-6.075-4.957-12.203-7.07-18.429c-0.816-2.399-1.11-5.165-0.865-7.687 c0.559-5.786,1.771-11.51,2.411-17.291c1.196-10.796,3.583-21.343,7.405-31.445c6.773-17.891,13.934-35.643,21.2-53.342 c4.619-11.249,7.817-22.852,10.167-34.75c1.644-8.319,2.477-16.63,1.901-25.137c-0.286-4.227,0.232-8.56,0.808-12.787 c1.669-12.232-2.46-19.547-13.843-24.068c-1.403-0.559-2.766-1.228-4.149-1.844c-2.15,0-4.3,0-6.455,0 c-2.909,0.91-5.871,1.681-8.715,2.762c-3.827,1.457-7.989,2.484-10.51,6.145c-1.701,2.472-4.088,3.5-6.916,4.06 c-3.9,0.771-7.797,1.62-11.62,2.705c-3.378,0.959-6.369,2.709-9.135,5.872c6.863,1.652,13.211,3.305,19.617,4.692 c7.629,1.652,14.558,4.729,20.518,9.763c2.954,2.493,5.667,5.447,6.165,9.425c0.51,4.084,0.608,8.271,0.392,12.383 c-0.563,10.694-4.137,20.661-7.976,30.515c-2.358,6.059-5.406,11.876-7.36,18.054c-4.321,13.656-8.486,27.348-14.19,40.522 c-3.309,7.646-6.83,15.251-8.307,23.534c-1.722,9.657-3.264,19.343-4.917,29.013c-0.845,4.958-0.877,10.049-2.864,14.819 c-0.873,2.093-1.269,4.406-1.693,6.654c-0.975,5.182-1.832,10.379-2.733,15.573c0,7.838,0,15.675,0,23.513 c0.632,3.905,1.363,7.801,1.877,11.722c1.481,11.232,4.773,21.955,8.825,32.489c0.816,2.121,1.322,4.378,1.783,6.613 c0.718,3.473,1.069,7.365,4.309,9.303c2.427,1.452,2.982,3.402,3.603,5.671c1.828,6.684,1.318,13.428,0.147,20.086 c-1.114,6.341-0.845,12.525,0.861,18.65c2.313,8.318,4.72,16.613,7.291,24.859c0.461,1.48,1.71,2.896,2.946,3.916 c5.3,4.382,10.735,8.605,16.108,12.897c0.355,0.281,0.645,0.656,0.914,1.028c2.652,3.672,6.373,5.879,10.677,6.638 c8.262,1.457,16.275,4.117,24.664,4.929c1.363,0.131,2.742,0.453,4.035,0.906c2.362,0.828,4.696,1.733,7.038,2.623 c1.257,0.824,2.391,1.832,3.415,3.064c-0.698,2.239-1.901,4.234-3.199,6.164c-3.529,5.239-8.344,8.948-14.007,11.633 c-5.818,2.754-11.975,4.442-18.242,5.744c-8.115,1.686-16.259,3.231-24.378,4.88c-6.789,1.379-13.248,3.79-19.633,6.414 c-8.25,3.39-16.463,6.879-24.77,10.13c-6.447,2.525-13.158,4.149-20.086,4.68c-2.077,0.159-4.178,0.017-6.267,0.065 c-0.604,0.017-1.326,0.045-1.783,0.367c-3.46,2.437-7.446,3.407-11.481,4.272c-1.607,0.347-3.203,0.742-4.802,1.117 c-4.423,1.049-7.703,3.672-10.237,7.36c-2.481,3.619-3.827,7.691-4.762,11.914c-1.26,5.708-1.685,11.521-1.921,17.344 c-0.306,7.405-0.526,14.814-0.828,22.22c-0.082,2.023-0.367,4.035-0.486,6.059c-0.033,0.592,0.012,1.302,0.314,1.779 c3.525,5.654,7.299,11.126,12.276,15.643c4.251,3.859,8.993,6.769,14.819,7.557c0.171,0.024,0.326,0.175,0.485,0.265 c1.775,0,3.55,0,5.32,0c1.032-0.253,2.085-0.444,3.097-0.767c2.216-0.702,4.415-1.461,6.663-2.212 c-0.196-1.881-0.971-3.166-2.317-3.962c-1.236-0.734-2.595-1.301-3.958-1.771c-1.73-0.596-3.55-0.942-5.275-1.554 c-1.114-0.396-2.208-0.968-3.174-1.648c-1.367-0.968-1.979-2.424-2.052-4.097c0.069-0.102,0.118-0.257,0.212-0.298 c4.643-1.885,7.16-5.879,9.694-9.837c0.298-0.461,0.294-1.195,0.241-1.787c-0.445-4.696-1.775-9.184-3.354-13.599 c-1.75-4.884-3.595-9.73-5.333-14.614c-0.551-1.547-0.836-3.183-1.326-4.749c-0.318-1.017,0.11-1.543,0.938-1.971 c1.64-0.841,3.423-0.832,5.189-0.886c2.464-0.073,4.945,0.041,7.393-0.188c1.408-0.131,2.925-0.515,4.121-1.236 c13.692-8.303,28.474-14.003,43.791-18.413c13.876-3.998,27.997-6.915,42.244-9.229c6.247-1.012,12.501-1.967,18.76-2.897 c0.918-0.134,1.665-0.428,2.371-1.027c4.227-3.595,9.217-5.586,14.635-6.259c5.773-0.715,11.608-0.951,17.393-1.563 c3.578-0.379,7.161-0.905,10.678-1.656c4.308-0.918,8.045-3.129,11.146-6.205c2.688-2.669,5.132-5.59,7.593-8.482 c3.28-3.855,6.414-7.834,9.727-11.661c1.02-1.179,2.432-2.012,3.631-3.039c0.792-0.674,1.501-0.653,2.391-0.11 c4.125,2.529,8.576,4.32,13.199,5.712c5.716,1.722,11.566,2.75,17.495,3.374c10.983,1.159,22,1.204,33.023,0.906 c3.166-0.086,6.333-0.09,9.503-0.184c0.93-0.029,1.718,0.171,2.473,0.729c3.309,2.444,6.646,4.852,9.963,7.291 c3.117,2.293,6.345,4.402,9.927,5.92c0.641,0.273,1.277,0.612,1.95,0.735c2.758,0.497,4.741,2.235,6.744,4.002 c5.908,5.214,11.343,10.894,16.161,17.111c6.324,8.156,12.468,16.455,18.617,24.745c6.152,8.295,12.342,16.557,19.396,24.125 c6.863,7.36,14.423,13.868,23.122,18.984c0.775,0.457,1.432,0.955,1.844,1.815c3.187,6.655,8.475,11.09,15.076,14.093 c6.81,3.097,14.006,4.256,21.444,4.142c10.33-0.159,20.062-2.53,28.906-8.014c5.264-3.264,9.572-7.471,12.347-13.097 c1.15-2.338,2.109-4.737,2.269-7.385c0.016-0.29,0.212-0.571,0.326-0.853c0-0.633,0-1.27,0-1.901 c-3.488-0.6-6.802,0.208-10.045,1.362c-3.101,1.102-6.124,2.416-9.25,3.443c-2.692,0.886-5.442,1.673-8.225,2.195 c-4.554,0.853-8.042-1.113-10.037-5.41c0.804-1.049,1.995-1.195,3.194-1.253c2.338-0.113,4.685-0.143,7.022-0.302 c0.799-0.053,1.664-0.249,2.338-0.648c0.6-0.359,1.121-1.024,1.411-1.673c0.498-1.126,0.311-1.44-0.869-2.085 c-3.402-1.856-6.993-3.264-10.714-4.324c-8.421-2.399-17.055-3.028-25.757-3.061c-1.836-0.008-3.677-0.004-5.513,0.082 c-0.963,0.045-1.66-0.249-2.366-0.906c-4.843-4.5-9.094-9.53-13.166-14.721c-6.613-8.429-12.48-17.389-18.47-26.259 c-2.836-4.198-5.786-8.319-8.769-12.411c-0.999-1.375-2.244-2.574-3.419-3.811c-0.384-0.404-0.885-0.727-1.383-0.991 c-1.358-0.727-2.269-0.408-2.905,1.003c-0.229,0.511-0.379,1.062-0.648,1.828c-0.633-0.465-1.179-0.841-1.697-1.253 c-5.03-4.019-8.866-9.058-11.905-14.655c-2.954-5.446-5.627-11.048-8.344-16.626c-2.607-5.353-5.092-10.767-8.438-15.712 c-1.521-2.248-3.317-4.312-4.9-6.523c-0.783-1.094-1.709-1.229-2.949-1.094c-5.324,0.579-10.625,0.494-15.843-0.894 c-2.591-0.689-5.035-1.718-7.1-3.488c-1.473-1.269-2.562-2.746-3.211-4.513c1.95-0.433,3.893-0.897,5.818-1.424 c6.459-1.767,12.926-2.469,19.552-2.081c7.964,0.466,15.92,1.159,23.892,1.437c2.853,0.098,5.966-0.172,8.557-1.244 c3.859-1.596,7.544-3.799,10.971-6.206c5.075-3.566,9.702-7.78,14.847-11.232c2.379-1.595,3.203-3.292,3.306-5.92 c0.134-3.509,1.9-4.781,5.3-4.149c0.6,0.114,1.203,0.253,1.787,0.44c3.852,1.229,7.633,1.028,11.489-0.163 c2.962-0.914,6.066-1.354,9.053-2.195c0.547-0.154,1.024-1.199,1.163-1.909c0.094-0.481-0.616-1.068-0.693-1.648 c-0.127-0.922-0.384-2.402,0.057-2.705c0.854-0.575,2.154-0.656,3.265-0.636c0.881,0.016,1.733,0.62,2.627,0.729 c2.064,0.258,3.995,0.021,5.247-1.986c1.232-1.971,1.277-3.864-0.163-5.757c-0.465-0.608-1.069-1.249-1.191-1.946 c-0.163-0.938-0.273-2.199,0.212-2.881c1.779-2.488,3.771-4.83,5.77-7.152c1.828-2.121,4.251-3.354,6.997-3.541 c0.967-0.065,2.158,0.742,2.966,1.465c0.633,0.562,0.686,1.729,1.261,2.407c0.674,0.795,1.628,1.347,2.465,2.007 c0.571-0.877,1.358-1.688,1.656-2.651c0.311-0.992-0.028-2.175,0.236-3.187c0.213-0.812,0.743-1.738,1.416-2.195 c3.591-2.439,7.442-4.524,10.861-7.177c2.574-1.991,4.508-4.786,6.944-6.98c4.182-3.771,9.526-5.097,14.789-6.472 c3.452-0.901,4.194-1.921,3.134-5.365c-0.514-1.673-1.228-3.309-2.052-4.854c-1.062-1.987-0.531-3.362,1.297-4.402 c0.727-0.412,1.498-0.751,2.252-1.114c2.387-1.139,4.08-2.701,4.688-5.521c0.612-2.827,1.75-5.549,2.741-8.286 c1.339-3.692,2.432-7.65,7.34-8.144c0.147-0.017,0.294-0.061,0.441-0.094c0-1.077,0-2.15,0-3.228 c-1.135-1.775-2.15-3.639-3.432-5.3C536.084,271.981,534.492,270.614,533.187,269.019z"
+            /></g
+          ></g
+        >
+      </svg>
+    {/if}
+  </div>
+  {#if showChat}
+    <div
+      id="_chat-popup"
+      class="absolute bottom-20 right-0 w-96 bg-white rounded-md shadow-md flex flex-col transition-all text-sm {minimizeChat
+        ? 'hidden'
+        : ''}"
+    >
+      <Container
+        chatConfiguration={{
+          chatType,
+          chatId,
+          chatTags,
+          chatReferenceTags,
+        }}
+        startPage={ustartPage}
+        {relays}
+        {toggleChat}
+        bind:chatStarted
+      />
+    </div>
+  {/if}
 </div>
 
-<footer class="py-6 bg-orange-900 font-mono text-white text-center mt-12 px-10">
-	<div class="flex justify-center flex-row">
-		<div class="text-sm">
-			NOSTRI.CHAT
-			by
-			<a class="text-purple-50 hover:text-orange-400" href="https://pablof7z.com">
-				@pablof7z
-			</a>
-		</div>
-	</div>
-</footer>
-
 <style>
-	/* div { border: solid red 1px; } */
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
 
-	@tailwind base;
-	@tailwind components;
-	@tailwind utilities;
+  :root {
+    --nostri-chat-custom-accent-color-50: #faf5ff;
+    --nostri-chat-custom-accent-color-100: #f3e8ff;
+    --nostri-chat-custom-accent-color-200: #e9d5ff;
+    --nostri-chat-custom-accent-color-300: #d8b4fe;
+    --nostri-chat-custom-accent-color-400: #c084fc;
+    --nostri-chat-custom-accent-color-500: #a855f7;
+    --nostri-chat-custom-accent-color-600: #9333ea;
+    --nostri-chat-custom-accent-color-700: #7e22ce;
+    --nostri-chat-custom-accent-color-800: #6b21a8;
+    --nostri-chat-custom-accent-color-900: #581c87;
+    --nostri-chat-custom-accent-color-950: #3b0764;
+  }
+
+  main {
+    scroll-behavior: smooth;
+  }
+
+  #scroll-hint {
+    transition: opacity 1s;
+  }
+
+  #_chat-widget-container {
+    z-index: 995;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+  }
+
+  #_chat-popup {
+    z-index: 996;
+    min-height: 500px;
+    max-height: 72vh;
+    transition: all 0.3s;
+    overflow: hidden;
+  }
+
+  @media (max-width: 768px) {
+    #_chat-popup {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      max-height: 100%;
+      border-radius: 0;
+    }
+  }
 </style>

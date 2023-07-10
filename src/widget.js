@@ -8,6 +8,11 @@ let chatTags = script.getAttribute('data-chat-tags');
 let chatId = script.getAttribute('data-chat-id');
 let chatReferenceTags = script.getAttribute('data-chat-reference-tags');
 let relays = script.getAttribute('data-relays');
+let startPage = script.getAttribute('data-start-page');
+let hideNostrIcon = script.getAttribute('data-hidenostricon');
+let simplifyNostrText = script.getAttribute('data-simplifynostrnext');
+let accentColor = script.getAttribute('data-accentcolor');
+
 script.parentNode.insertBefore(div, script);
 
 if (!relays) {
@@ -17,10 +22,15 @@ if (!relays) {
 relays = relays.split(',');
 chatTags = chatTags ? chatTags.split(',') : [];
 chatReferenceTags = chatReferenceTags ? chatReferenceTags.split(',') : [];
+accentColor = accentColor ? accentColor.split(',') : [];
 
 const embed = new Widget({
 	target: div,
 	props: {
+		accentColor,
+		hideNostrIcon,
+		simplifyNostrText,
+		startPage,
 		websiteOwnerPubkey,
 		chatType,
 		chatTags,

@@ -6,6 +6,9 @@
   import NstrAdapterNip46 from "./lib/adapters/nip46.js";
   import NstrAdapterDiscadableKeys from "./lib/adapters/discardable-keys.js";
 
+  export let firstStartupDone;
+  export let managedLogin;
+  export let startPage;
   export let websiteOwnerPubkey;
   export let chatConfiguration;
   export let relays;
@@ -34,6 +37,13 @@
       websiteOwnerPubkey,
       relays,
     };
+
+    if (startPage === "chat") {
+      firstStartupDone();
+      chatAdapter.set(new NstrAdapterDiscadableKeys(adapterConfig));
+    } else {
+      managedLogin();
+    }
   });
 
   function useNip07() {
@@ -41,6 +51,19 @@
       localStorage.setItem("nostrichat-type", "nip07");
       chatAdapter.set(new NstrAdapterNip07(pubkey, adapterConfig));
     });
+  }
+  
+  let showAdvanced = false;
+  let foundKeys = false;
+
+  if (localStorage.getItem("nostrichat-discardable-key") || localStorage.getItem("nostrichat-discardable-public-key")) {
+    foundKeys = true;
+  }
+
+  function resetKeys() {
+    localStorage.removeItem("nostrichat-discardable-key");
+    localStorage.removeItem("nostrichat-discardable-public-key");
+    foundKeys = false;
   }
 
   import { generatePrivateKey, getPublicKey } from "nostr-tools";
@@ -157,7 +180,7 @@
     </p>
 
     <div class="bg-white w-full p-3" on:click|preventDefault={Nip46Copy}>
-      <!-- <QR text={nip46URI} /> -->
+      <!--<QR text={nip46URI} />-->
     </div>
 
     <button class="bg-purple-800 hover:bg-purple-700 w-full p-2 rounded-xl text-center font-regular text-white"
@@ -189,6 +212,15 @@
         Anonymous
         <span class="text-xs text-gray-300"> (Ephemeral Keys) </span>
       </button>
+
+      {#if foundKeys}
+      <button on:click={() => showAdvanced = !showAdvanced} class="text-purple-700 my-4 hover:underline text-xs">View Advanced</button>
+      {#if showAdvanced == true}
+      <button class="bg-red-700 hover:bg-red-600 w-full p-4 rounded-xl text-center font-regular text-gray-200"
+      on:click|preventDefault={resetKeys}
+      >Reset Anonymous Keys</button>
+      {/if}
+      {/if}
     </div>
   {/if}
 </div>
