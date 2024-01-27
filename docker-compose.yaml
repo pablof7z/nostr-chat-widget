@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  nostr-chat-widget:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3027:4173
